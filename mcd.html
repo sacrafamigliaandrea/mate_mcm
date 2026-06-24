@@ -1,0 +1,395 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCD — pratica con impalcatura a scomparsa</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#1E3A8A;   --primaryD:#172E6B;  --primaryL:rgba(30,58,138,.08);
+  --accent:#D97706;    --accentD:#B45309;   --accentL:rgba(217,119,6,.12);
+  --ok:#15803D;        --okL:rgba(21,128,61,.10);
+  --bg:#FBF9F4;        --card:#FFFFFF;
+  --text:#1F2937;      --muted:#5B6472;     --light:#9AA2AE;
+  --brd:#E3DDD0;       --brd2:#CFC7B6;
+  --shadow:0 2px 14px rgba(30,58,138,.07);
+  --maxw:1100px;
+  --head:'Lexend',system-ui,sans-serif;
+  --body:'Lexend',system-ui,sans-serif;
+  --radius:14px;
+}
+html.accessibile{ --body:'Atkinson Hyperlegible',Helvetica,Arial,sans-serif; }
+html.accessibile body{ letter-spacing:.01em; line-height:1.75; }
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{font-family:var(--body);font-size:18px;line-height:1.65;color:var(--text);background:var(--bg);-webkit-text-size-adjust:100%}
+h1,h2,h3,.head{font-family:var(--head);font-weight:600;line-height:1.25;margin:0}
+a{color:var(--primary)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+.topbar{position:sticky;top:0;z-index:40;background:var(--card);border-bottom:1px solid var(--brd);box-shadow:var(--shadow)}
+.topbar-in{max-width:var(--maxw);margin:0 auto;display:flex;align-items:center;gap:14px;padding:12px 18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px;margin-right:auto}
+.brand .mark{width:38px;height:38px;border-radius:10px;flex:0 0 auto;background:var(--primary);color:#fff;display:grid;place-items:center}
+.brand .mark svg{width:22px;height:22px}
+.brand h1{font-size:1.06rem;letter-spacing:-.01em}
+.brand .sub{font-size:.78rem;color:var(--muted);font-family:var(--body);font-weight:400}
+.tool{display:inline-flex;align-items:center;gap:8px;min-height:44px;padding:8px 14px;font-family:var(--head);font-size:.9rem;font-weight:500;color:var(--text);background:var(--card);border:1.5px solid var(--brd2);border-radius:11px;cursor:pointer;transition:background .15s,border-color .15s}
+.tool svg{width:18px;height:18px}
+.tool:hover{background:var(--primaryL);border-color:var(--primary)}
+.tool[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+.tool.ghost{border-color:var(--brd)}
+.tool.danger:hover{background:var(--accentL);border-color:var(--accent);color:var(--accentD)}
+.nick-chip{display:inline-flex;align-items:center;gap:7px;min-height:44px;padding:6px 13px;border-radius:11px;background:var(--primaryL);color:var(--primaryD);font-family:var(--head);font-weight:500;font-size:.9rem}
+.nick-chip svg{width:17px;height:17px}
+
+main{max-width:var(--maxw);margin:0 auto;padding:30px 18px 64px}
+.phase-head{margin-bottom:20px}
+.phase-kicker{display:inline-flex;align-items:center;gap:8px;font-family:var(--head);font-weight:600;font-size:.8rem;text-transform:uppercase;letter-spacing:.08em;color:var(--accentD);background:var(--accentL);padding:5px 12px;border-radius:999px;margin-bottom:12px}
+.phase-kicker svg{width:15px;height:15px}
+.phase-head h2{font-size:1.7rem;letter-spacing:-.02em;margin-bottom:8px}
+.phase-head p.lead{color:var(--muted);max-width:64ch;margin:0}
+
+.btn{display:inline-flex;align-items:center;gap:9px;min-height:48px;padding:11px 20px;font-family:var(--head);font-weight:600;font-size:.95rem;border-radius:12px;cursor:pointer;border:1.5px solid transparent;transition:background .15s,border-color .15s,transform .05s}
+.btn:active{transform:translateY(1px)}
+.btn svg{width:18px;height:18px}
+.btn.primary{background:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primaryD)}
+.btn.secondary{background:var(--card);color:var(--text);border-color:var(--brd2)}
+.btn.secondary:hover{border-color:var(--primary);background:var(--primaryL)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+
+.gate{position:fixed;inset:0;z-index:90;background:rgba(31,41,55,.55);backdrop-filter:blur(3px);display:grid;place-items:center;padding:20px}
+.gate[hidden]{display:none}
+.gate-card{background:var(--card);border-radius:18px;max-width:440px;width:100%;padding:30px 28px;box-shadow:0 18px 60px rgba(0,0,0,.25)}
+.gate-card .mark{width:54px;height:54px;border-radius:14px;background:var(--primary);color:#fff;display:grid;place-items:center;margin-bottom:16px}
+.gate-card .mark svg{width:30px;height:30px}
+.gate-card h2{font-size:1.35rem;margin-bottom:6px;letter-spacing:-.01em}
+.gate-card p{color:var(--muted);font-size:.95rem;margin:0 0 18px}
+.field label{display:block;font-family:var(--head);font-weight:600;font-size:.85rem;margin-bottom:7px}
+.field input{width:100%;min-height:50px;padding:12px 14px;font-size:18px;font-family:var(--body);color:var(--text);border:1.5px solid var(--brd2);border-radius:12px;background:#fff}
+.field input:focus-visible{border-color:var(--primary)}
+.gate-card .btn{width:100%;justify-content:center;margin-top:16px}
+.gate-msg{min-height:20px;font-size:.85rem;color:var(--accentD);margin-top:10px}
+
+.notice{display:flex;gap:11px;align-items:flex-start;background:var(--accentL);border:1px solid var(--accent);color:var(--accentD);border-radius:12px;padding:13px 15px;font-size:.92rem}
+.notice svg{width:20px;height:20px;flex:0 0 auto;margin-top:1px}
+footer{max-width:var(--maxw);margin:0 auto;padding:22px 18px 40px;color:var(--light);font-size:.82rem;border-top:1px solid var(--brd)}
+
+/* ---------- Pratica con impalcatura a scomparsa ---------- */
+.f3-intro{margin:0 0 4px;max-width:66ch}
+.f3-intro b{color:var(--primaryD)}
+.f3-steps{display:flex;flex-direction:column;gap:20px;margin-top:18px}
+.f3-prob{border:1px solid var(--brd);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow);overflow:hidden;transition:opacity .25s,filter .25s}
+.f3-prob.locked{opacity:.5;filter:grayscale(.45);pointer-events:none}
+.f3-phead{display:flex;align-items:center;gap:12px;padding:13px 18px;background:var(--primaryL);border-bottom:1px solid var(--brd)}
+.f3-badge{display:inline-flex;align-items:center;gap:9px;font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--primaryD)}
+.f3-badge .n{width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.85rem}
+.f3-support{margin-left:auto;display:inline-flex;align-items:center;gap:9px;font-family:var(--head);font-weight:600;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.f3-gauge{width:56px;height:8px;border-radius:5px;background:var(--brd);overflow:hidden}
+.f3-gauge i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.f3-body{padding:18px}
+.f3-story{margin:0 0 12px;font-size:1.02rem}
+.f3-story b{color:var(--primaryD)}
+.f3-illus{margin:4px 0 16px;background:var(--bg);border:1px solid var(--brd);border-radius:12px;padding:12px 10px}
+.f3-illus svg{width:100%;max-width:430px;height:auto;display:block;margin:0 auto}
+.f3-given{background:var(--bg);border:1px solid var(--brd);border-radius:12px;padding:13px 16px;margin:0 0 14px}
+.f3-given .lab{font-family:var(--head);font-weight:600;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:9px}
+.f3-fac{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--head);font-size:1.08rem}
+.f3-fac b{color:var(--primaryD);font-weight:700}
+.f3-fac sup{font-size:.7em}
+.f3-maxtext{margin:0 0 14px;font-size:1rem;background:var(--accentL);border:1px solid var(--accent);border-radius:11px;padding:11px 14px;color:var(--text)}
+.f3-maxtext b{color:var(--accentD);font-weight:700}
+.f3-maxrow{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;margin:2px 0 0}
+.f3-exp{display:flex;flex-direction:column;gap:6px}
+.f3-exp label{font-family:var(--head);font-weight:600;font-size:.85rem;color:var(--text)}
+.f3-exp .base{color:var(--primaryD);font-size:1.1rem}
+.f3-exp input{width:74px;min-height:48px;font-size:20px;text-align:center;border:1.5px solid var(--brd2);border-radius:11px;font-family:var(--head);font-weight:700;color:var(--primary);background:#fff}
+.f3-exp input:focus-visible{border-color:var(--primary)}
+.f3-exp input:disabled{opacity:.7;background:var(--okL);border-color:var(--ok);color:var(--ok)}
+.f3-answer{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px}
+.f3-answer .eq{font-family:var(--head);font-weight:600;font-size:1.1rem;color:var(--text)}
+.f3-answer .eq sup{font-size:.7em}
+.f3-answer input{width:118px;min-height:50px;font-size:22px;text-align:center;border:1.5px solid var(--brd2);border-radius:12px;font-family:var(--head);font-weight:700;color:var(--primary);background:#fff}
+.f3-answer input:focus-visible{border-color:var(--primary)}
+.f3-answer input:disabled{opacity:.85;background:var(--okL);border-color:var(--ok);color:var(--ok)}
+.f3-scratch{display:block;width:100%;max-width:520px;margin:0 0 4px;font-size:17px;font-family:var(--body);padding:11px 13px;border:1.5px solid var(--brd2);border-radius:12px;resize:vertical;color:var(--text);background:#fff;line-height:1.5}
+.f3-scratch:focus-visible{border-color:var(--primary);outline:none}
+.f3-fb{min-height:22px;margin-top:13px;font-size:.95rem;font-weight:500}
+.f3-fb.retry{color:var(--accentD)}
+.f3-fb.ok{color:var(--ok)}
+.f3-prob.solved .f3-phead{background:var(--okL)}
+.f3-prob.solved .f3-badge,.f3-prob.solved .f3-badge .n{color:var(--ok)}
+.f3-prob.solved .f3-badge .n{background:var(--ok);color:#fff}
+
+@media(max-width:560px){
+  .brand .sub{display:none}
+  .phase-head h2{font-size:1.4rem}
+  main{padding:22px 14px 50px}
+}
+</style>
+</head>
+<body>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="ic-factor"><circle cx="12" cy="5" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="18" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10.6 6.9 7.4 15.9M13.4 6.9l3.2 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+    <g id="ic-check"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-arrow"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-access"><circle cx="12" cy="4.6" r="2" fill="currentColor"/><path d="M4 8.5c2.6 1 5.1 1.5 8 1.5s5.4-.5 8-1.5M12 10v5M12 15l-3.2 5M12 15l3.2 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+    <g id="ic-reset"><path d="M19 12a7 7 0 1 1-2.05-4.95M19 4v4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
+  </defs>
+</svg>
+
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+  <div class="gate-card">
+    <div class="mark"><svg viewBox="0 0 24 24"><use href="#ic-factor"/></svg></div>
+    <h2 id="gate-title">Chi sei oggi?</h2>
+    <p>Scrivi un soprannome per ritrovare il tuo lavoro. Sui Mac condivisi serve a non mescolare il percorso di compagni diversi.</p>
+    <div class="field">
+      <label for="nick-input">Soprannome</label>
+      <input id="nick-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="24" placeholder="es. volpe-blu">
+    </div>
+    <button class="btn primary" id="gate-start" type="button">
+      <svg viewBox="0 0 24 24"><use href="#ic-arrow"/></svg> Inizia
+    </button>
+    <div class="gate-msg" id="gate-msg" role="status" aria-live="polite"></div>
+  </div>
+</div>
+
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="mark"><svg viewBox="0 0 24 24"><use href="#ic-factor"/></svg></span>
+      <div>
+        <h1>Massimo Comun Divisore</h1>
+        <div class="sub">pratica guidata &middot; scuola secondaria di I grado</div>
+      </div>
+    </div>
+    <span class="nick-chip" id="nick-chip" hidden>
+      <svg viewBox="0 0 24 24"><use href="#ic-access"/></svg>
+      <span id="nick-label">—</span>
+    </span>
+    <button class="tool" id="btn-access" type="button" aria-pressed="false">
+      <svg viewBox="0 0 24 24"><use href="#ic-access"/></svg>
+      <span>Alta leggibilità</span>
+    </button>
+    <button class="tool ghost danger" id="btn-reset" type="button">
+      <svg viewBox="0 0 24 24"><use href="#ic-reset"/></svg>
+      <span>Ricomincia</span>
+    </button>
+  </div>
+</header>
+
+<main id="main"></main>
+
+<footer>Prototipo — pratica guidata MCD.</footer>
+
+<script>
+"use strict";
+(function(){
+
+  /* ---------- Persistenza nick-based ---------- */
+  const STORE_KEY = "mcd_v1_state";
+  function loadStore(){ try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }catch(e){ return {}; } }
+  function saveStore(s){ try{ localStorage.setItem(STORE_KEY, JSON.stringify(s)); }catch(e){} }
+  function freshProfile(){ return { accessibile:false, data:{} }; }
+
+  let store = loadStore();
+  if(typeof store.profiles !== "object" || store.profiles === null) store.profiles = {};
+  let nick = store.active || null;
+  function profile(){ if(!nick) return null; if(!store.profiles[nick]) store.profiles[nick]=freshProfile(); return store.profiles[nick]; }
+  function persist(){ saveStore(store); }
+
+  const gate=document.getElementById("gate"), nickInput=document.getElementById("nick-input"),
+    gateStart=document.getElementById("gate-start"), gateMsg=document.getElementById("gate-msg"),
+    nickChip=document.getElementById("nick-chip"), nickLabel=document.getElementById("nick-label"),
+    main=document.getElementById("main"), btnAccess=document.getElementById("btn-access"),
+    btnReset=document.getElementById("btn-reset");
+
+  function icon(id){ return '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#'+id+'"/></svg>'; }
+
+  /* ---------- Aritmetica e illustrazione ---------- */
+  function factorize(n){ const f=[]; let d=2,m=n; while(d*d<=m){ while(m%d===0){ f.push(d); m/=d; } d++; } if(m>1) f.push(m); return f; }
+  const PCOL = {2:"#1E3A8A",3:"#0E7490",5:"#7C3AED",7:"#15803D",11:"#B45309",13:"#4B5563"};
+
+  /* Tessere dei fattori primi: i fattori comuni col minimo esponente (= MCD) sono evidenziati se reveal */
+  function tilesSVG(values, reveal){
+    const facs = values.map(factorize);
+    /* conteggio minimo comune per ogni primo */
+    const allPrimes = {};
+    facs.forEach(f => { const c={}; f.forEach(p=>c[p]=(c[p]||0)+1); for(const p in c){ allPrimes[p]=(p in allPrimes)?Math.min(allPrimes[p],c[p]):c[p]; if(!facs.every(g=>g.indexOf(+p)>=0)) allPrimes[p]=0; } });
+    const tw=30, gap=6, x0=64, top=14, rowH=42;
+    let maxTiles=0; facs.forEach(f=>maxTiles=Math.max(maxTiles,f.length));
+    const W = x0 + maxTiles*(tw+gap) + 8;
+    const H = top + values.length*rowH + (reveal?22:6);
+    let s="";
+    facs.forEach((f,i)=>{
+      const y = top + i*rowH;
+      s += '<text x="6" y="'+(y+tw/2+5)+'" font-family="var(--head)" font-size="15" font-weight="700" fill="var(--primaryD)">'+values[i]+'</text>';
+      const used={};
+      f.forEach((p,j)=>{
+        used[p]=(used[p]||0)+1;
+        const x = x0 + j*(tw+gap);
+        const isMcd = reveal && used[p] <= (allPrimes[p]||0);
+        s += '<rect x="'+x+'" y="'+y+'" width="'+tw+'" height="'+tw+'" rx="7" fill="'+(PCOL[p]||"#4B5563")+'"'+(isMcd?' stroke="var(--accent)" stroke-width="3"':'')+'/>';
+        s += '<text x="'+(x+tw/2)+'" y="'+(y+tw/2+5)+'" text-anchor="middle" font-family="var(--head)" font-size="15" font-weight="700" fill="#fff">'+p+'</text>';
+      });
+    });
+    if(reveal){
+      let mcd=1; for(const p in allPrimes) mcd *= Math.pow(+p, allPrimes[p]);
+      s += '<text x="'+x0+'" y="'+(top+values.length*rowH+14)+'" font-family="var(--head)" font-size="12.5" font-weight="700" fill="var(--accentD)">I fattori cerchiati in ambra, comuni a tutti, sono il MCD = '+mcd+'</text>';
+    }
+    const aria = reveal ? "Fattori primi: in ambra i fattori comuni che formano il MCD" : "Fattori primi dei numeri a confronto";
+    return '<div class="f3-illus"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+aria+'"><title>'+aria+'</title>'+s+'</svg></div>';
+  }
+
+  function hintFor(P, ans){
+    if(P.mcd % ans === 0 && ans < P.mcd) return "È un divisore comune, ma non il più grande.";
+    if(P.values.every(v => v % ans === 0) && ans < P.mcd) return "Divide tutti i numeri, ma ce n'è uno più grande che li divide ancora.";
+    if(P.values.some(v => v % ans !== 0)) return "Quel numero non divide esattamente tutti.";
+    return "Deve dividere tutti i numeri ed essere il più grande possibile.";
+  }
+
+  /* ---------- I tre problemi (impalcatura a scomparsa) ---------- */
+  const PROBS = [
+    { support:"2/3", frac:66,
+      story:'In laboratorio hai <b>12</b> penne blu e <b>18</b> penne rosse. Vuoi preparare il <b>maggior numero</b> di kit tutti uguali, senza avanzi. Quanti kit puoi fare al massimo?',
+      values:[12,18], illus:"full", mcd:6,
+      factor:['<b>12</b> = 2<sup>2</sup> &middot; 3','<b>18</b> = 2 &middot; 3<sup>2</sup>'],
+      showFactor:true, showGiven:true,
+      maxText:'Prendi solo i primi <b>comuni</b>, ciascuno con l\'esponente <b>più basso</b>: <b>2</b> (esponente 1) e <b>3</b> (esponente 1).',
+      product:'2 &middot; 3' },
+    { support:"1/3", frac:33,
+      story:'Per le feste prepari sacchetti tutti uguali con <b>24</b> caramelle, <b>36</b> biscotti e <b>60</b> cioccolatini, senza avanzi. Qual è il <b>numero massimo</b> di sacchetti?',
+      values:[24,36,60], illus:"plain", mcd:12,
+      factor:['<b>24</b> = 2<sup>3</sup> &middot; 3','<b>36</b> = 2<sup>2</sup> &middot; 3<sup>2</sup>','<b>60</b> = 2<sup>2</sup> &middot; 3 &middot; 5'],
+      showFactor:true, showGiven:false,
+      expAnswers:[{base:2,exp:2},{base:3,exp:1},{base:5,exp:0}],
+      product:'' },
+    { support:"0", frac:0,
+      story:'Hai tre nastri lunghi <b>16</b>, <b>24</b> e <b>40</b> centimetri. Vuoi tagliarli in pezzi tutti della <b>stessa lunghezza</b>, la più lunga possibile, senza sprechi. Quanti centimetri misura ogni pezzo?',
+      values:[16,24,40], illus:"none", mcd:8,
+      showFactor:false, product:'' }
+  ];
+
+  function buildPractice(body){
+    const d = profile().data;
+    if(!d.mcd) d.mcd = { solved:[false,false,false], scratch:"" };
+    const st = d.mcd;
+    if(!Array.isArray(st.solved) || st.solved.length !== 3) st.solved=[false,false,false];
+
+    body.innerHTML =
+      '<p class="f3-intro">Il metodo del video: <b>scomponi</b> in fattori primi, tieni solo i primi <b>comuni</b> a tutti '+
+      'con l\'esponente <b>più basso</b>, poi <b>moltiplica</b>. Tre problemi: nel primo quasi tutto è pronto, '+
+      'poi l\'aiuto cala, fino all\'ultimo che risolvi da solo.</p>'+
+      '<div class="f3-steps" id="f3-steps"></div>';
+    const wrap = body.querySelector("#f3-steps");
+
+    function refreshLocks(){
+      [].slice.call(wrap.children).forEach((el,idx)=>{
+        const unlocked = idx===0 || st.solved[idx-1];
+        el.classList.toggle("locked", !unlocked);
+        el.classList.toggle("solved", !!st.solved[idx]);
+      });
+    }
+
+    function renderProb(P, idx){
+      const el = document.createElement("div");
+      el.className = "f3-prob";
+      const solved = !!st.solved[idx];
+
+      let mid = "";
+      if(P.showFactor){
+        mid += '<div class="f3-given"><div class="lab">Scomposizione in fattori primi</div><div class="f3-fac">'+
+          P.factor.map(f=>'<span>'+f+'</span>').join('')+'</div></div>';
+      }
+      if(P.showFactor && P.showGiven){
+        mid += '<p class="f3-maxtext">'+P.maxText+'</p>';
+      } else if(P.showFactor && !P.showGiven){
+        mid += '<div class="f3-given"><div class="lab">Per ogni primo: esponente più basso tra i comuni (0 se non è in tutti)</div><div class="f3-maxrow">'+
+          P.expAnswers.map(m=>'<div class="f3-exp"><label>Primo <span class="base">'+m.base+'</span></label>'+
+            '<input type="number" inputmode="numeric" min="0" max="6" class="f3-expi" data-base="'+m.base+'"'+(solved?' value="'+m.exp+'" disabled':'')+'></div>').join('')+
+          '</div></div>';
+      } else {
+        mid += '<textarea class="f3-scratch" rows="3" placeholder="Spazio per i tuoi calcoli (facoltativo)…"></textarea>';
+      }
+
+      const eqLead = 'MCD = ' + (P.product ? P.product + ' = ' : '');
+      const ansHTML = '<div class="f3-answer"><span class="eq">'+eqLead+'</span>'+
+        '<input type="number" inputmode="numeric" min="1" class="f3-ans" aria-label="Valore del MCD"'+(solved?' value="'+P.mcd+'" disabled':'')+'>'+
+        (solved?'':'<button class="btn primary f3-check" type="button">'+icon("ic-check")+'Verifica</button>')+'</div>';
+
+      const illusHTML = P.illus==="none" ? '' : tilesSVG(P.values, P.illus==="full");
+
+      el.innerHTML =
+        '<div class="f3-phead"><span class="f3-badge"><span class="n">'+(idx+1)+'</span>Problema '+(idx+1)+'</span>'+
+          '<span class="f3-support">Supporto '+P.support+'<span class="f3-gauge"><i style="width:'+P.frac+'%"></i></span></span></div>'+
+        '<div class="f3-body"><p class="f3-story">'+P.story+'</p>'+illusHTML+mid+ansHTML+
+          '<div class="f3-fb'+(solved?' ok':'')+'" role="status" aria-live="polite">'+(solved?'Risolto: il MCD è '+P.mcd+'.':'')+'</div></div>';
+
+      const fb=el.querySelector(".f3-fb"), ansEl=el.querySelector(".f3-ans"),
+        checkBtn=el.querySelector(".f3-check"), scratch=el.querySelector(".f3-scratch");
+      function setFb(k,t){ fb.className="f3-fb "+k; fb.textContent=t; }
+      if(scratch){ scratch.value=st.scratch||""; scratch.addEventListener("input",()=>{ st.scratch=scratch.value; persist(); }); }
+      if(checkBtn){
+        checkBtn.addEventListener("click", ()=>{
+          if(P.showFactor && !P.showGiven){
+            const expIns=[].slice.call(el.querySelectorAll(".f3-expi"));
+            let anyEmpty=false, expOk=true;
+            expIns.forEach(ei=>{ const want=P.expAnswers.find(m=>m.base===parseInt(ei.dataset.base,10)).exp; const got=parseInt(ei.value,10); if(isNaN(got)) anyEmpty=true; else if(got!==want) expOk=false; });
+            if(anyEmpty){ setFb("retry","Completa l'esponente di ogni primo (metti 0 se non è comune a tutti)."); return; }
+            if(!expOk){ setFb("retry","Qualche esponente non va. Ricorda: solo i primi comuni, con l'esponente più basso (0 se manca in qualche numero)."); return; }
+          }
+          const ans=parseInt(ansEl.value,10);
+          if(isNaN(ans)){ setFb("retry","Scrivi il valore del MCD."); return; }
+          if(ans===P.mcd){
+            st.solved[idx]=true; persist();
+            setFb("ok","Esatto: il MCD è "+P.mcd+". "+(idx<2?"Si sblocca il problema successivo, con meno aiuto.":"Hai chiuso i tre problemi, l'ultimo senza impalcatura."));
+            ansEl.disabled=true; checkBtn.disabled=true;
+            el.querySelectorAll(".f3-expi").forEach(ei=>ei.disabled=true);
+            el.classList.add("solved"); refreshLocks();
+          } else {
+            setFb("retry","Non ci siamo ancora. "+hintFor(P,ans));
+          }
+        });
+      }
+      return el;
+    }
+
+    PROBS.forEach((P,idx)=>wrap.appendChild(renderProb(P,idx)));
+    refreshLocks();
+  }
+
+  /* ---------- Render ---------- */
+  function renderMain(){
+    main.innerHTML =
+      '<div class="phase-head">'+
+        '<span class="phase-kicker">'+icon("ic-factor")+'Pratica · modello e regola</span>'+
+        '<h2>Costruisci il MCD con i fattori primi</h2>'+
+        '<p class="lead">Tre problemi, sempre lo stesso metodo: scomponi, tieni i primi comuni col minimo esponente, moltiplica. A ogni problema l\'impalcatura si abbassa.</p>'+
+      '</div><div class="phase-body"></div>';
+    buildPractice(main.querySelector(".phase-body"));
+  }
+
+  /* ---------- Accessibilità / reset / gate ---------- */
+  function applyAccess(){ const p=profile(); const on=!!(p&&p.accessibile); document.documentElement.classList.toggle("accessibile",on); btnAccess.setAttribute("aria-pressed",on?"true":"false"); }
+  btnAccess.addEventListener("click", ()=>{ const p=profile(); if(!p) return; p.accessibile=!p.accessibile; persist(); applyAccess(); });
+  btnReset.addEventListener("click", ()=>{ if(!nick) return; if(!window.confirm('Ricominciare da capo il lavoro di "'+nick+'"? I progressi salvati verranno cancellati.')) return; delete store.profiles[nick]; store.active=null; nick=null; persist(); openGate(); });
+
+  function openGate(){ gate.hidden=false; nickChip.hidden=true; nickInput.value=""; gateMsg.textContent=""; document.documentElement.classList.remove("accessibile"); setTimeout(()=>nickInput.focus(),60); }
+  function startWith(raw){ const clean=raw.trim().replace(/\s+/g,"-").toLowerCase().slice(0,24); if(clean.length<2){ gateMsg.textContent="Scrivi almeno due caratteri."; nickInput.focus(); return; } nick=clean; store.active=nick; if(!store.profiles[nick]) store.profiles[nick]=freshProfile(); persist(); enterApp(); }
+  gateStart.addEventListener("click", ()=>startWith(nickInput.value));
+  nickInput.addEventListener("keydown", e=>{ if(e.key==="Enter") startWith(nickInput.value); });
+
+  function enterApp(){ gate.hidden=true; nickChip.hidden=false; nickLabel.textContent=nick; applyAccess(); renderMain(); }
+  function init(){ if(nick && store.profiles[nick]) enterApp(); else { nick=null; store.active=null; openGate(); } }
+  init();
+})();
+</script>
+</body>
+</html>

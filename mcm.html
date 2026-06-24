@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MCM — sequenza laboratoriale</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;500;600;700&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  /* Palette neutra "laboratorio scientifico" — nomi generici per ri-tematizzare verso MCD */
+  --primary:#1E3A8A;   --primaryD:#172E6B;  --primaryL:rgba(30,58,138,.08);
+  --accent:#D97706;    --accentD:#B45309;   --accentL:rgba(217,119,6,.12);
+  --ok:#15803D;        --okL:rgba(21,128,61,.10);
+  --bg:#FBF9F4;        --card:#FFFFFF;
+  --text:#1F2937;      --muted:#5B6472;     --light:#9AA2AE;
+  --brd:#E3DDD0;       --brd2:#CFC7B6;
+  --shadow:0 2px 14px rgba(30,58,138,.07);
+  --maxw:1100px;
+  --head:'Lexend',system-ui,sans-serif;
+  --body:'Lexend',system-ui,sans-serif;
+  --radius:14px;
+}
+/* Modalita accessibile: corpo in Atkinson Hyperlegible */
+html.accessibile{ --body:'Atkinson Hyperlegible',Helvetica,Arial,sans-serif; }
+html.accessibile body{ letter-spacing:.01em; line-height:1.75; }
+
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--body);
+  font-size:18px; line-height:1.65;
+  color:var(--text); background:var(--bg);
+  -webkit-text-size-adjust:100%;
+}
+h1,h2,h3,.head{font-family:var(--head);font-weight:600;line-height:1.25;margin:0}
+a{color:var(--primary)}
+
+/* ---------- Focus visibile ovunque ---------- */
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px;border-radius:6px}
+
+/* ---------- Layout guscio ---------- */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:var(--card);border-bottom:1px solid var(--brd);
+  box-shadow:var(--shadow);
+}
+.topbar-in{
+  max-width:var(--maxw);margin:0 auto;
+  display:flex;align-items:center;gap:14px;
+  padding:12px 18px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:11px;margin-right:auto}
+.brand .mark{
+  width:38px;height:38px;border-radius:10px;flex:0 0 auto;
+  background:var(--primary);color:#fff;
+  display:grid;place-items:center;
+}
+.brand .mark svg{width:22px;height:22px}
+.brand h1{font-size:1.06rem;letter-spacing:-.01em}
+.brand .sub{font-size:.78rem;color:var(--muted);font-family:var(--body);font-weight:400}
+
+.tool{
+  display:inline-flex;align-items:center;gap:8px;
+  min-height:44px;padding:8px 14px;
+  font-family:var(--head);font-size:.9rem;font-weight:500;
+  color:var(--text);background:var(--card);
+  border:1.5px solid var(--brd2);border-radius:11px;
+  cursor:pointer;transition:background .15s,border-color .15s;
+}
+.tool svg{width:18px;height:18px}
+.tool:hover{background:var(--primaryL);border-color:var(--primary)}
+.tool[aria-pressed="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+.tool.ghost{border-color:var(--brd)}
+.tool.danger:hover{background:var(--accentL);border-color:var(--accent);color:var(--accentD)}
+.nick-chip{
+  display:inline-flex;align-items:center;gap:7px;
+  min-height:44px;padding:6px 13px;border-radius:11px;
+  background:var(--primaryL);color:var(--primaryD);
+  font-family:var(--head);font-weight:500;font-size:.9rem;
+}
+.nick-chip svg{width:17px;height:17px}
+
+/* ---------- Barra fasi ---------- */
+.phasebar{background:var(--card);border-bottom:1px solid var(--brd)}
+.phasebar-in{
+  max-width:var(--maxw);margin:0 auto;
+  display:flex;gap:8px;flex-wrap:wrap;
+  padding:10px 18px;
+}
+.pill{
+  display:inline-flex;align-items:center;gap:9px;
+  min-height:44px;padding:7px 14px;
+  border:1.5px solid var(--brd2);border-radius:999px;
+  background:var(--card);color:var(--text);
+  font-family:var(--head);font-weight:500;font-size:.88rem;
+  cursor:pointer;transition:background .15s,border-color .15s,color .15s;
+}
+.pill .num{
+  width:23px;height:23px;flex:0 0 auto;border-radius:50%;
+  background:var(--brd);color:var(--text);
+  display:grid;place-items:center;font-size:.78rem;font-weight:700;
+}
+.pill svg{width:18px;height:18px}
+.pill:hover{border-color:var(--primary);background:var(--primaryL)}
+.pill[aria-current="true"]{background:var(--primary);border-color:var(--primary);color:#fff}
+.pill[aria-current="true"] .num{background:rgba(255,255,255,.25);color:#fff}
+.pill.done .num{background:var(--ok);color:#fff}
+.pill.map{border-style:dashed}
+
+/* ---------- Contenuto ---------- */
+main{max-width:var(--maxw);margin:0 auto;padding:30px 18px 64px}
+.phase{display:none;animation:fade .25s ease}
+.phase.active{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+
+.phase-head{margin-bottom:20px}
+.phase-kicker{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--head);font-weight:600;font-size:.8rem;
+  text-transform:uppercase;letter-spacing:.08em;color:var(--accentD);
+  background:var(--accentL);padding:5px 12px;border-radius:999px;margin-bottom:12px;
+}
+.phase-kicker svg{width:15px;height:15px}
+.phase-head h2{font-size:1.7rem;letter-spacing:-.02em;margin-bottom:8px}
+.phase-head p.lead{color:var(--muted);max-width:62ch;margin:0}
+
+.card{
+  background:var(--card);border:1px solid var(--brd);
+  border-radius:var(--radius);box-shadow:var(--shadow);
+  padding:24px;
+}
+.placeholder{
+  border:1.5px dashed var(--brd2);background:#fff;
+  border-radius:var(--radius);padding:26px;color:var(--muted);
+}
+.placeholder h3{font-size:1.05rem;color:var(--text);margin-bottom:8px;display:flex;align-items:center;gap:9px}
+.placeholder h3 svg{width:19px;height:19px;color:var(--primary)}
+.placeholder ul{margin:10px 0 0;padding-left:22px}
+.placeholder li{margin:5px 0}
+
+.phase-nav{display:flex;justify-content:space-between;gap:12px;margin-top:28px}
+.btn{
+  display:inline-flex;align-items:center;gap:9px;
+  min-height:48px;padding:11px 20px;
+  font-family:var(--head);font-weight:600;font-size:.95rem;
+  border-radius:12px;cursor:pointer;border:1.5px solid transparent;
+  transition:background .15s,border-color .15s,transform .05s;
+}
+.btn:active{transform:translateY(1px)}
+.btn svg{width:18px;height:18px}
+.btn.primary{background:var(--primary);color:#fff}
+.btn.primary:hover{background:var(--primaryD)}
+.btn.secondary{background:var(--card);color:var(--text);border-color:var(--brd2)}
+.btn.secondary:hover{border-color:var(--primary);background:var(--primaryL)}
+.btn[disabled]{opacity:.4;cursor:not-allowed}
+
+/* ---------- Gate nick ---------- */
+.gate{
+  position:fixed;inset:0;z-index:90;
+  background:rgba(31,41,55,.55);backdrop-filter:blur(3px);
+  display:grid;place-items:center;padding:20px;
+}
+.gate[hidden]{display:none}
+.gate-card{
+  background:var(--card);border-radius:18px;
+  max-width:440px;width:100%;padding:30px 28px;
+  box-shadow:0 18px 60px rgba(0,0,0,.25);
+}
+.gate-card .mark{
+  width:54px;height:54px;border-radius:14px;background:var(--primary);
+  color:#fff;display:grid;place-items:center;margin-bottom:16px;
+}
+.gate-card .mark svg{width:30px;height:30px}
+.gate-card h2{font-size:1.35rem;margin-bottom:6px;letter-spacing:-.01em}
+.gate-card p{color:var(--muted);font-size:.95rem;margin:0 0 18px}
+.field label{display:block;font-family:var(--head);font-weight:600;font-size:.85rem;margin-bottom:7px}
+.field input{
+  width:100%;min-height:50px;padding:12px 14px;font-size:18px;
+  font-family:var(--body);color:var(--text);
+  border:1.5px solid var(--brd2);border-radius:12px;background:#fff;
+}
+.field input:focus-visible{border-color:var(--primary)}
+.gate-card .btn{width:100%;justify-content:center;margin-top:16px}
+.gate-msg{min-height:20px;font-size:.85rem;color:var(--accentD);margin-top:10px}
+
+/* ---------- Avviso ambra (mai rosso) ---------- */
+.notice{
+  display:flex;gap:11px;align-items:flex-start;
+  background:var(--accentL);border:1px solid var(--accent);
+  color:var(--accentD);border-radius:12px;padding:13px 15px;font-size:.92rem;
+}
+.notice svg{width:20px;height:20px;flex:0 0 auto;margin-top:1px}
+
+/* ---------- Footer ---------- */
+footer{
+  max-width:var(--maxw);margin:0 auto;padding:22px 18px 40px;
+  color:var(--light);font-size:.82rem;border-top:1px solid var(--brd);
+}
+
+.visually-hidden{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+
+/* ---------- Fase 1: timeline autobus ---------- */
+.f1-intro{margin:0;max-width:66ch}
+.f1-intro b{color:var(--primaryD)}
+.f1-clock{display:flex;align-items:baseline;gap:14px;margin:18px 0 22px;flex-wrap:wrap}
+.f1-clock .time{font-family:var(--head);font-weight:700;font-size:2.5rem;letter-spacing:-.02em;color:var(--primary);line-height:1}
+.f1-clock .min{color:var(--muted);font-size:1rem}
+.f1-clock .min b{color:var(--text);font-weight:700}
+.f1-tracks{display:flex;flex-direction:column;gap:12px;margin:6px 0 4px}
+.f1-track{display:grid;grid-template-columns:135px 1fr;align-items:center;gap:14px}
+.f1-tlabel{display:flex;align-items:center;gap:9px;font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--text)}
+.f1-tlabel .ico{width:32px;height:32px;flex:0 0 auto;border-radius:9px;background:var(--primary);color:#fff;display:grid;place-items:center}
+.f1-tlabel .ico svg{width:19px;height:19px}
+.f1-tlabel .freq{display:block;font-family:var(--body);font-weight:400;font-size:.78rem;color:var(--muted)}
+.f1-lane{position:relative;height:48px;background:var(--primaryL);border-radius:12px}
+.f1-base{position:absolute;left:12px;right:12px;top:50%;height:2px;background:var(--brd2);transform:translateY(-50%)}
+.f1-mk{position:absolute;top:50%;width:10px;height:10px;border-radius:50%;background:var(--primary);transform:translate(-50%,-50%);transition:box-shadow .15s,background .15s}
+.f1-mk.start{width:13px;height:13px;background:var(--primaryD)}
+.f1-mk.hit{background:var(--accent);box-shadow:0 0 0 5px var(--accentL)}
+.f1-ph{position:absolute;top:-3px;bottom:-3px;width:2px;background:var(--text);border-radius:2px;transition:left .25s ease;z-index:3}
+.f1-ph::before{content:"";position:absolute;top:-7px;left:50%;width:11px;height:11px;border-radius:50%;background:var(--text);transform:translateX(-50%)}
+.f1-tracks.coincide .f1-ph{background:var(--accent);width:3px}
+.f1-tracks.coincide .f1-ph::before{background:var(--accent)}
+.f1-controls{display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin:24px 0 0}
+.f1-slider{flex:1;min-width:220px;display:flex;align-items:center;gap:12px}
+.f1-slider input[type=range]{flex:1;accent-color:var(--primary);height:30px;cursor:pointer}
+.f1-note{margin-top:18px}
+.f1-note .neutral{color:var(--muted);font-size:.96rem;padding:2px 0;min-height:24px}
+.f1-discovery{margin-top:18px;display:none}
+.f1-discovery.on{display:block}
+@media(max-width:560px){
+  .f1-track{grid-template-columns:1fr;gap:7px}
+  .f1-tlabel{margin-bottom:2px}
+}
+
+/* ---------- Fase 2: tabella dei multipli ---------- */
+.f2-intro{margin:0;max-width:64ch}
+.f2-intro b{color:var(--primaryD)}
+.f2-controls{display:flex;flex-wrap:wrap;align-items:flex-end;gap:16px;margin:18px 0 4px}
+.f2-num{display:flex;flex-direction:column;gap:7px}
+.f2-num label{font-family:var(--head);font-weight:600;font-size:.85rem}
+.f2-num input{width:100px;min-height:50px;font-size:22px;text-align:center;border:1.5px solid var(--brd2);border-radius:12px;font-family:var(--head);font-weight:700;color:var(--primary);background:#fff}
+.f2-num input:focus-visible{border-color:var(--primary)}
+.f2-num[hidden]{display:none}
+.f2-hint{min-height:22px;color:var(--muted);font-size:.92rem;margin:10px 0 16px}
+.f2-table-wrap{display:flex;justify-content:center;overflow-x:auto}
+.f2-table{border-collapse:separate;border-spacing:8px}
+.f2-table th{background:var(--primary);color:#fff;font-family:var(--head);font-weight:700;border-radius:10px;padding:11px 14px;min-width:66px;font-size:1.08rem}
+.f2-table th.mult{background:transparent;color:var(--light);min-width:34px;font-size:.95rem;font-weight:600}
+.f2-cell{background:var(--card);border:1.5px solid var(--brd);border-radius:10px;padding:11px 14px;text-align:center;font-family:var(--head);font-weight:600;font-size:1.05rem;color:var(--text);min-width:66px;transition:background .2s,border-color .2s}
+.f2-cell.common{background:var(--accentL);border-color:var(--accent);color:var(--accentD)}
+.f2-cell.first{background:var(--accent);border-color:var(--accentD);color:#fff;box-shadow:0 0 0 4px var(--accentL)}
+.f2-table tbody tr{animation:f2row .32s both}
+@keyframes f2row{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+.f2-ask{margin-top:28px;max-width:560px}
+.f2-ask-q{display:block;font-family:var(--head);font-weight:600;font-size:1.1rem;margin-bottom:9px}
+.f2-ask textarea{width:100%;font-size:18px;font-family:var(--body);padding:12px 14px;border:1.5px solid var(--brd2);border-radius:12px;resize:vertical;color:var(--text);background:#fff;line-height:1.5}
+.f2-ask textarea:focus-visible{border-color:var(--primary);outline:none}
+
+/* ---------- Fase 3: pratica con impalcatura a scomparsa ---------- */
+.f3-intro{margin:0 0 4px;max-width:66ch}
+.f3-intro b{color:var(--primaryD)}
+.f3-steps{display:flex;flex-direction:column;gap:20px;margin-top:18px}
+.f3-prob{border:1px solid var(--brd);border-radius:var(--radius);background:var(--card);box-shadow:var(--shadow);overflow:hidden;transition:opacity .25s,filter .25s}
+.f3-prob.locked{opacity:.5;filter:grayscale(.45);pointer-events:none}
+.f3-phead{display:flex;align-items:center;gap:12px;padding:13px 18px;background:var(--primaryL);border-bottom:1px solid var(--brd)}
+.f3-badge{display:inline-flex;align-items:center;gap:9px;font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--primaryD)}
+.f3-badge .n{width:26px;height:26px;border-radius:50%;background:var(--primary);color:#fff;display:grid;place-items:center;font-weight:700;font-size:.85rem}
+.f3-support{margin-left:auto;display:inline-flex;align-items:center;gap:9px;font-family:var(--head);font-weight:600;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted)}
+.f3-gauge{width:56px;height:8px;border-radius:5px;background:var(--brd);overflow:hidden}
+.f3-gauge i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.f3-body{padding:18px}
+.f3-story{margin:0 0 12px;font-size:1.02rem}
+.f3-story b{color:var(--primaryD)}
+.f3-illus{margin:4px 0 16px;background:var(--bg);border:1px solid var(--brd);border-radius:12px;padding:12px 10px}
+.f3-illus svg{width:100%;max-width:470px;height:auto;display:block;margin:0 auto}
+.f3-given{background:var(--bg);border:1px solid var(--brd);border-radius:12px;padding:13px 16px;margin:0 0 14px}
+.f3-given .lab{font-family:var(--head);font-weight:600;font-size:.76rem;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin-bottom:9px}
+.f3-fac{display:flex;flex-wrap:wrap;gap:8px 22px;font-family:var(--head);font-size:1.08rem}
+.f3-fac b{color:var(--primaryD);font-weight:700}
+.f3-fac sup{font-size:.7em}
+.f3-maxtext{margin:0 0 14px;font-size:1rem;background:var(--accentL);border:1px solid var(--accent);border-radius:11px;padding:11px 14px;color:var(--text)}
+.f3-maxtext b{color:var(--accentD);font-weight:700}
+.f3-maxrow{display:flex;flex-wrap:wrap;gap:16px;align-items:flex-end;margin:2px 0 0}
+.f3-exp{display:flex;flex-direction:column;gap:6px}
+.f3-exp label{font-family:var(--head);font-weight:600;font-size:.85rem;color:var(--text)}
+.f3-exp .base{color:var(--primaryD);font-size:1.1rem}
+.f3-exp input{width:74px;min-height:48px;font-size:20px;text-align:center;border:1.5px solid var(--brd2);border-radius:11px;font-family:var(--head);font-weight:700;color:var(--primary);background:#fff}
+.f3-exp input:focus-visible{border-color:var(--primary)}
+.f3-exp input:disabled{opacity:.7;background:var(--okL);border-color:var(--ok);color:var(--ok)}
+.f3-answer{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:16px}
+.f3-answer .eq{font-family:var(--head);font-weight:600;font-size:1.1rem;color:var(--text)}
+.f3-answer .eq sup{font-size:.7em}
+.f3-answer input{width:118px;min-height:50px;font-size:22px;text-align:center;border:1.5px solid var(--brd2);border-radius:12px;font-family:var(--head);font-weight:700;color:var(--primary);background:#fff}
+.f3-answer input:focus-visible{border-color:var(--primary)}
+.f3-answer input:disabled{opacity:.85;background:var(--okL);border-color:var(--ok);color:var(--ok)}
+.f3-scratch{display:block;width:100%;max-width:520px;margin:0 0 4px;font-size:17px;font-family:var(--body);padding:11px 13px;border:1.5px solid var(--brd2);border-radius:12px;resize:vertical;color:var(--text);background:#fff;line-height:1.5}
+.f3-scratch:focus-visible{border-color:var(--primary);outline:none}
+.f3-fb{min-height:22px;margin-top:13px;font-size:.95rem;font-weight:500}
+.f3-fb.retry{color:var(--accentD)}
+.f3-fb.ok{color:var(--ok)}
+.f3-prob.solved .f3-phead{background:var(--okL)}
+.f3-prob.solved .f3-badge,.f3-prob.solved .f3-badge .n{color:var(--ok)}
+.f3-prob.solved .f3-badge .n{background:var(--ok);color:#fff}
+
+@media(max-width:560px){
+  .brand .sub{display:none}
+  .phase-head h2{font-size:1.4rem}
+  main{padding:22px 14px 50px}
+}
+</style>
+</head>
+<body>
+
+<!-- ===== Sprite SVG: 10 icone, zero emoji ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <g id="ic-bus"><path d="M4 16V6a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10M4 16h16M4 16v2a1 1 0 0 0 1 1h1a1 1 0 0 0 1-1v-1M20 16v2a1 1 0 0 1-1 1h-1a1 1 0 0 1-1-1v-1M4 9h16M9 4v5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><circle cx="7.5" cy="13" r="1.1" fill="currentColor"/><circle cx="16.5" cy="13" r="1.1" fill="currentColor"/></g>
+    <g id="ic-lens"><circle cx="10.5" cy="10.5" r="6" fill="none" stroke="currentColor" stroke-width="2"/><path d="M15 15l4.5 4.5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+    <g id="ic-factor"><circle cx="12" cy="5" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="18" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10.6 6.9 7.4 15.9M13.4 6.9l3.2 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+    <g id="ic-prime"><rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v8M9 11l3-3 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-check"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-arrow"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-map"><path d="M9 4 4 6v14l5-2 6 2 5-2V4l-5 2-6-2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></g>
+    <g id="ic-warn"><path d="M12 4 2.5 20h19L12 4Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.15" fill="currentColor"/></g>
+    <g id="ic-access"><circle cx="12" cy="4.6" r="2" fill="currentColor"/><path d="M4 8.5c2.6 1 5.1 1.5 8 1.5s5.4-.5 8-1.5M12 10v5M12 15l-3.2 5M12 15l3.2 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
+    <g id="ic-reset"><path d="M19 12a7 7 0 1 1-2.05-4.95M19 4v4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
+  </defs>
+</svg>
+
+<!-- ===== Gate nick ===== -->
+<div class="gate" id="gate" role="dialog" aria-modal="true" aria-labelledby="gate-title">
+  <div class="gate-card">
+    <div class="mark"><svg viewBox="0 0 24 24"><use href="#ic-factor"/></svg></div>
+    <h2 id="gate-title">Chi sei oggi?</h2>
+    <p>Scrivi un soprannome per ritrovare il tuo percorso. Sui Mac condivisi serve a non mescolare il lavoro di compagni diversi.</p>
+    <div class="field">
+      <label for="nick-input">Soprannome</label>
+      <input id="nick-input" type="text" autocomplete="off" autocapitalize="off" spellcheck="false" maxlength="24" placeholder="es. volpe-blu">
+    </div>
+    <button class="btn primary" id="gate-start" type="button">
+      <svg viewBox="0 0 24 24"><use href="#ic-arrow"/></svg> Inizia il percorso
+    </button>
+    <div class="gate-msg" id="gate-msg" role="status" aria-live="polite"></div>
+  </div>
+</div>
+
+<!-- ===== Topbar ===== -->
+<header class="topbar">
+  <div class="topbar-in">
+    <div class="brand">
+      <span class="mark"><svg viewBox="0 0 24 24"><use href="#ic-factor"/></svg></span>
+      <div>
+        <h1>Minimo Comune Multiplo</h1>
+        <div class="sub">sequenza laboratoriale &middot; scuola secondaria di I grado</div>
+      </div>
+    </div>
+    <span class="nick-chip" id="nick-chip" hidden>
+      <svg viewBox="0 0 24 24"><use href="#ic-access"/></svg>
+      <span id="nick-label">—</span>
+    </span>
+    <button class="tool" id="btn-access" type="button" aria-pressed="false">
+      <svg viewBox="0 0 24 24"><use href="#ic-access"/></svg>
+      <span>Alta leggibilità</span>
+    </button>
+    <button class="tool ghost danger" id="btn-reset" type="button">
+      <svg viewBox="0 0 24 24"><use href="#ic-reset"/></svg>
+      <span>Ricomincia</span>
+    </button>
+  </div>
+</header>
+
+<!-- ===== Barra fasi (popolata da JS) ===== -->
+<nav class="phasebar" aria-label="Fasi del percorso">
+  <div class="phasebar-in" id="phasebar"></div>
+</nav>
+
+<!-- ===== Contenuto fasi ===== -->
+<main id="main"></main>
+
+<footer>Prototipo — sequenza laboratoriale MCM.</footer>
+
+<script>
+"use strict";
+(function(){
+
+  /* ---------- Modello fasi ---------- */
+  const SECTIONS = [
+    { id:"map-open", kind:"map",   icon:"ic-map",    nav:"Mappa",  title:"Mappa del percorso",
+      kicker:"Apertura", lead:"Le competenze che metterai in gioco. I nodi si accendono man mano che procedi." },
+    { id:"f1", kind:"phase", n:1, icon:"ic-bus",    nav:"Motivazione", title:"Quando ripartono insieme?",
+      kicker:"Fase 1 · Osservazione", lead:"Tre linee di autobus partono insieme alle 7:00 con frequenze diverse. Scopri quando si ritrovano." },
+    { id:"f2", kind:"phase", n:2, icon:"ic-lens",   nav:"Esplora", title:"I multipli a confronto",
+      kicker:"Fase 2 · Scoperta guidata", lead:"Scegli due numeri e osserva i loro multipli. Qualcosa si ripete." },
+    { id:"f3", kind:"phase", n:3, icon:"ic-factor", nav:"Struttura", title:"Costruisci il MCM con i fattori primi",
+      kicker:"Fase 3 · Modello e regola", lead:"Tre problemi, sempre lo stesso metodo: scomponi, prendi gli esponenti più alti, moltiplica. A ogni problema l'impalcatura si abbassa." },
+    { id:"f4", kind:"phase", n:4, icon:"ic-check",  nav:"Pratica", title:"Esercizi graduati",
+      kicker:"Fase 4 · Pratica", lead:"Otto esercizi, dal facile al trabocchetto. Il feedback ti accompagna." },
+    { id:"f5", kind:"phase", n:5, icon:"ic-arrow",  nav:"Transfer", title:"Lo stesso problema, travestito",
+      kicker:"Fase 5 · Transfer", lead:"Tre situazioni reali. Riconosci dov'è nascosto il MCM." },
+    { id:"f6", kind:"phase", n:6, icon:"ic-prime",  nav:"Metacognizione", title:"Collega e rifletti",
+      kicker:"Fase 6 · Metacognizione", lead:"Costruisci la mappa dei concetti e rispondi alle domande." },
+    { id:"map-close", kind:"map", icon:"ic-map",    nav:"Traguardo", title:"Dove sei arrivato",
+      kicker:"Chiusura", lead:"Il quadro completo del percorso e i traguardi raggiunti." }
+  ];
+
+  /* Anteprima dei contenuti in arrivo (riempiti negli step successivi) */
+  const PREVIEW = {
+    "map-open":["Mappa a tre livelli: prerequisiti, competenze costruite, competenze attivate","I nodi si illuminano toccando le fasi"],
+    "f1":["Timeline interattiva con tre tracce (12 / 15 / 18 minuti)","Pulsante \"avanza il tempo\", coincidenza illuminata in ambra","Nessuna formula: solo scoperta del multiplo comune"],
+    "f2":["Due input numerici (2–20) e i primi 12 multipli per colonna","I multipli comuni si evidenziano in ambra","Una sola domanda guida: \"Cosa noti?\""],
+    "f3":["Scomposizioni affiancate, fattori primi colorati per famiglia","Trascina i fattori nella \"cassetta MCM\"","La regola compare solo dopo la costruzione corretta"],
+    "f4":["Otto esercizi: 2 facili, 2 medi, 2 avanzati, 2 trabocchetti","Feedback descrittivo, non valutativo","Traguardo BASE / INTERMEDIO / AVANZATO dai risultati"],
+    "f5":["Semafori sincronizzati lungo un viale","Due atleti su una pista circolare","Turni di mensa con cicli sfalsati"],
+    "f6":["Mappa concettuale: nodi e archi da collegare","Tre domande aperte salvate in locale"],
+    "map-close":["Mappa di chiusura con tutti i nodi accesi","Il traguardo raggiunto, comunicato come \"dove sei arrivato\""]
+  };
+
+  /* ---------- Persistenza nick-based ---------- */
+  const STORE_KEY = "mcm_v1_state";
+
+  function loadStore(){
+    try{ return JSON.parse(localStorage.getItem(STORE_KEY)) || {}; }
+    catch(e){ return {}; }
+  }
+  function saveStore(store){
+    try{ localStorage.setItem(STORE_KEY, JSON.stringify(store)); }catch(e){}
+  }
+  function freshProfile(){
+    return { current:0, accessibile:false, visited:[], data:{} };
+  }
+
+  let store = loadStore();
+  if(typeof store.profiles !== "object" || store.profiles === null) store.profiles = {};
+  let nick = store.active || null;
+
+  function profile(){
+    if(!nick) return null;
+    if(!store.profiles[nick]) store.profiles[nick] = freshProfile();
+    return store.profiles[nick];
+  }
+  function persist(){ saveStore(store); }
+
+  /* ---------- Riferimenti DOM ---------- */
+  const gate      = document.getElementById("gate");
+  const nickInput = document.getElementById("nick-input");
+  const gateStart = document.getElementById("gate-start");
+  const gateMsg   = document.getElementById("gate-msg");
+  const nickChip  = document.getElementById("nick-chip");
+  const nickLabel = document.getElementById("nick-label");
+  const phasebar  = document.getElementById("phasebar");
+  const main      = document.getElementById("main");
+  const btnAccess = document.getElementById("btn-access");
+  const btnReset  = document.getElementById("btn-reset");
+
+  function icon(id){ return '<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#'+id+'"/></svg>'; }
+
+  /* ---------- Render barra fasi ---------- */
+  function renderPhasebar(){
+    const p = profile();
+    phasebar.innerHTML = "";
+    SECTIONS.forEach((s, i) => {
+      const b = document.createElement("button");
+      b.type = "button";
+      b.className = "pill" + (s.kind === "map" ? " map" : "");
+      if(p && p.visited.includes(i) && i !== p.current) b.classList.add("done");
+      b.setAttribute("aria-current", p && i === p.current ? "true" : "false");
+      const lead = s.kind === "phase"
+        ? '<span class="num">'+s.n+'</span>'
+        : icon(s.icon);
+      b.innerHTML = lead + "<span>" + s.nav + "</span>";
+      b.addEventListener("click", () => goTo(i));
+      phasebar.appendChild(b);
+    });
+  }
+
+  /* ---------- Builder per fase (gli step successivi aggiungono qui) ---------- */
+  function placeholderHTML(s){
+    const prev = (PREVIEW[s.id] || []).map(x => "<li>"+x+"</li>").join("");
+    return '<div class="placeholder"><h3>'+icon(s.icon)+'In arrivo nei prossimi step</h3><ul>'+prev+'</ul></div>';
+  }
+
+  /* Fase 1 — timeline autobus: tre linee (12/15/18 min), scoperta del multiplo comune */
+  function buildF1(body){
+    const lines = [["A",12],["B",15],["C",18]];
+    const MAX = 180; /* mcm(12,15,18) — il primo istante in cui coincidono */
+    const data = profile().data;
+    if(!data.f1) data.f1 = { current:0, discovered:false };
+    const f1 = data.f1;
+
+    function clock(min){
+      const h = 7 + Math.floor(min/60), m = min % 60;
+      return (h<10?"0":"")+h+":"+(m<10?"0":"")+m;
+    }
+    function pos(min){ return "calc(12px + "+(min/MAX)+" * (100% - 24px))"; }
+
+    body.innerHTML =
+      '<p class="f1-intro">Tre linee di autobus partono insieme dal capolinea alle <b>07:00</b>. '+
+      'Ognuna torna con il suo ritmo: <b>A</b> ogni 12 minuti, <b>B</b> ogni 15, <b>C</b> ogni 18. '+
+      'Quando ripartono di nuovo <b>tutte e tre insieme</b>? Fai scorrere il tempo e osserva i passaggi.</p>'+
+      '<div class="f1-clock"><span class="time" id="f1-time">07:00</span>'+
+        '<span class="min">minuto <b id="f1-min">0</b> dopo la partenza</span></div>'+
+      '<div class="f1-tracks" id="f1-tracks"></div>'+
+      '<div class="f1-controls">'+
+        '<button class="btn primary" id="f1-next" type="button">Avanza al prossimo passaggio'+icon("ic-arrow")+'</button>'+
+        '<button class="btn secondary" id="f1-rew" type="button">'+icon("ic-reset")+'Riavvolgi</button>'+
+        '<span class="f1-slider"><input type="range" id="f1-range" min="0" max="'+MAX+'" step="1" value="0" aria-label="Minuti dopo la partenza"></span>'+
+      '</div>'+
+      '<div class="f1-note"><div class="neutral" id="f1-note" role="status" aria-live="polite">Alle 07:00 partono tutte e tre insieme.</div></div>'+
+      '<div class="f1-discovery" id="f1-disc"><div class="notice">'+icon("ic-check")+
+        '<div><b>Minuto 180 &mdash; ore 10:00.</b> Dopo 180 minuti le tre linee ripartono di nuovo insieme: '+
+        'è il primo istante in cui i ritmi 12, 15 e 18 si ritrovano. Tieni a mente questo numero: lo rincontrerai nella prossima fase.</div></div></div>';
+
+    const tracks = body.querySelector("#f1-tracks");
+    lines.forEach(([name,freq])=>{
+      const row = document.createElement("div");
+      row.className = "f1-track";
+      let mks = '<span class="f1-mk start" data-min="0" style="left:'+pos(0)+'"></span>';
+      for(let m=freq; m<=MAX; m+=freq){
+        mks += '<span class="f1-mk" data-min="'+m+'" style="left:'+pos(m)+'"></span>';
+      }
+      row.innerHTML =
+        '<div class="f1-tlabel"><span class="ico">'+icon("ic-bus")+'</span>'+
+          '<span>Linea '+name+'<span class="freq">ogni '+freq+' min</span></span></div>'+
+        '<div class="f1-lane"><div class="f1-base"></div>'+mks+
+          '<div class="f1-ph" style="left:'+pos(0)+'"></div></div>';
+      tracks.appendChild(row);
+    });
+
+    const timeEl = body.querySelector("#f1-time");
+    const minEl  = body.querySelector("#f1-min");
+    const noteEl = body.querySelector("#f1-note");
+    const discEl = body.querySelector("#f1-disc");
+    const range  = body.querySelector("#f1-range");
+    const nextBtn= body.querySelector("#f1-next");
+    const phs    = [].slice.call(body.querySelectorAll(".f1-ph"));
+    const mks    = [].slice.call(body.querySelectorAll(".f1-mk"));
+
+    function render(){
+      const cur = f1.current;
+      timeEl.textContent = clock(cur);
+      minEl.textContent = cur;
+      range.value = cur;
+      phs.forEach(ph => ph.style.left = pos(cur));
+      mks.forEach(mk => mk.classList.toggle("hit", cur>0 && parseInt(mk.dataset.min,10)===cur));
+      const hit = lines.filter(([n,f]) => cur>0 && cur%f===0).map(([n]) => n);
+      tracks.classList.toggle("coincide", hit.length===3);
+      let txt;
+      if(cur===0) txt = "Alle 07:00 partono tutte e tre insieme. Fai scorrere il tempo per vedere quando si ritrovano.";
+      else if(hit.length===3) txt = "Minuto "+cur+", ore "+clock(cur)+": tutte e tre le linee ripartono insieme.";
+      else if(hit.length===2) txt = "Minuto "+cur+": le linee "+hit.join(" e ")+" ripartono insieme, ma non la terza.";
+      else if(hit.length===1) txt = "Minuto "+cur+": riparte solo la linea "+hit[0]+".";
+      else txt = "Minuto "+cur+": in questo istante non riparte nessuna linea.";
+      noteEl.textContent = txt;
+      discEl.classList.toggle("on", hit.length===3);
+      if(hit.length===3 && !f1.discovered){ f1.discovered = true; persist(); }
+      nextBtn.disabled = cur >= MAX;
+    }
+    function setCur(v){
+      f1.current = Math.max(0, Math.min(MAX, Math.round(v)));
+      persist();
+      render();
+    }
+    function nextEvent(){
+      const cur = f1.current;
+      let best = null;
+      lines.forEach(([n,f]) => {
+        const m = (Math.floor(cur/f)+1)*f;
+        if(m<=MAX && (best===null || m<best)) best = m;
+      });
+      if(best!==null) setCur(best);
+    }
+    nextBtn.addEventListener("click", nextEvent);
+    body.querySelector("#f1-rew").addEventListener("click", () => setCur(0));
+    range.addEventListener("input", () => setCur(parseInt(range.value,10)));
+    render();
+  }
+
+  /* Fase 2 — tabella dei multipli: i comuni si illuminano, il primo è il MCM (non detto) */
+  function buildF2(body){
+    const d = profile().data;
+    if(!d.f2) d.f2 = { a:4, b:6, c:8, useThird:false, note:"" };
+    const f2 = d.f2;
+    const ROWS = 12;
+
+    body.innerHTML =
+      '<p class="f2-intro">Scegli due numeri e osserva i loro <b>multipli</b>. Alcuni numeri compaiono in tutte le colonne: si illuminano. '+
+      'Che cosa hanno di speciale i numeri illuminati?</p>'+
+      '<div class="f2-controls">'+
+        '<div class="f2-num"><label for="f2-a">Primo numero</label><input id="f2-a" type="number" inputmode="numeric" min="2" max="20" value="'+f2.a+'"></div>'+
+        '<div class="f2-num"><label for="f2-b">Secondo numero</label><input id="f2-b" type="number" inputmode="numeric" min="2" max="20" value="'+f2.b+'"></div>'+
+        '<div class="f2-num" id="f2-cwrap"'+(f2.useThird?'':' hidden')+'><label for="f2-c">Terzo numero</label><input id="f2-c" type="number" inputmode="numeric" min="2" max="20" value="'+f2.c+'"></div>'+
+        '<button class="tool" id="f2-toggle" type="button" aria-pressed="'+(f2.useThird?'true':'false')+'">'+icon("ic-factor")+'<span id="f2-toggle-l">'+(f2.useThird?'Togli il terzo numero':'Aggiungi un terzo numero')+'</span></button>'+
+      '</div>'+
+      '<div class="f2-hint" id="f2-hint" role="status" aria-live="polite"></div>'+
+      '<div class="f2-table-wrap" id="f2-table"></div>'+
+      '<div class="f2-ask"><label class="f2-ask-q" for="f2-note">Cosa noti?</label>'+
+        '<textarea id="f2-note" rows="3" placeholder="Scrivi qui la tua osservazione..."></textarea></div>';
+
+    const elA = body.querySelector("#f2-a");
+    const elB = body.querySelector("#f2-b");
+    const elC = body.querySelector("#f2-c");
+    const cwrap = body.querySelector("#f2-cwrap");
+    const toggle = body.querySelector("#f2-toggle");
+    const toggleL = body.querySelector("#f2-toggle-l");
+    const hint = body.querySelector("#f2-hint");
+    const tableWrap = body.querySelector("#f2-table");
+    const noteEl = body.querySelector("#f2-note");
+    noteEl.value = f2.note || "";
+
+    function readValid(){
+      const active = f2.useThird ? [elA,elB,elC] : [elA,elB];
+      const nums = [];
+      for(const el of active){
+        const v = parseInt(el.value, 10);
+        if(isNaN(v) || v < 2 || v > 20) return null;
+        nums.push(v);
+      }
+      return nums;
+    }
+    function build(){
+      const nums = readValid();
+      if(!nums){
+        hint.textContent = "Scegli numeri interi tra 2 e 20.";
+        tableWrap.innerHTML = "";
+        return;
+      }
+      const cols = nums.map(n => { const s=[]; for(let k=1;k<=ROWS;k++) s.push(n*k); return s; });
+      const sets = cols.map(c => new Set(c));
+      const commons = cols[0].filter(v => sets.every(s => s.has(v)));
+      const firstCommon = commons.length ? Math.min.apply(null, commons) : null;
+      const commonSet = new Set(commons);
+
+      let html = '<table class="f2-table"><thead><tr><th scope="col" class="mult">&times;</th>';
+      nums.forEach(n => html += '<th scope="col">'+n+'</th>');
+      html += '</tr></thead><tbody>';
+      for(let k=1;k<=ROWS;k++){
+        html += '<tr style="animation-delay:'+((k-1)*45)+'ms"><th scope="row" class="mult">'+k+'</th>';
+        cols.forEach(c => {
+          const v = c[k-1];
+          let cls = "f2-cell";
+          if(commonSet.has(v)) cls += (v===firstCommon) ? " first" : " common";
+          html += '<td class="'+cls+'">'+v+'</td>';
+        });
+        html += '</tr>';
+      }
+      html += '</tbody></table>';
+      tableWrap.innerHTML = html;
+
+      hint.textContent = commons.length
+        ? ""
+        : "Tra i primi 12 multipli non se n'è ancora incontrato uno in comune. Prova numeri piu vicini tra loro.";
+    }
+    function onChange(){
+      const nums = readValid();
+      if(nums){
+        f2.a = parseInt(elA.value,10);
+        f2.b = parseInt(elB.value,10);
+        if(f2.useThird) f2.c = parseInt(elC.value,10);
+        persist();
+      }
+      build();
+    }
+    [elA, elB, elC].forEach(el => el.addEventListener("input", onChange));
+    toggle.addEventListener("click", () => {
+      f2.useThird = !f2.useThird;
+      cwrap.hidden = !f2.useThird;
+      toggle.setAttribute("aria-pressed", f2.useThird ? "true" : "false");
+      toggleL.textContent = f2.useThird ? "Togli il terzo numero" : "Aggiungi un terzo numero";
+      persist();
+      build();
+    });
+    noteEl.addEventListener("input", () => { f2.note = noteEl.value; persist(); });
+    build();
+  }
+
+  /* Fase 3 — pratica con impalcatura a scomparsa: 3 problemi, supporto 2/3 -> 1/3 -> 0.
+     Stesso metodo del video (scomponi -> esponenti massimi -> prodotto); l'aiuto cala a ogni passo. */
+  function buildF3(body){
+    const d = profile().data;
+    if(!d.f3) d.f3 = { solved:[false,false,false], scratch:"" };
+    const st = d.f3;
+    if(!Array.isArray(st.solved) || st.solved.length !== 3) st.solved = [false,false,false];
+
+    const PROBS = [
+      { support:"2/3", frac:66,
+        story:'Due fari di un porto lampeggiano insieme a mezzanotte. Il primo torna a lampeggiare ogni <b>4</b> secondi, il secondo ogni <b>6</b>. Dopo quanti secondi lampeggiano di nuovo <b>insieme</b>?',
+        items:[{label:"ogni 4 s",freq:4},{label:"ogni 6 s",freq:6}],
+        illus:"full", mcm:12,
+        factor:['<b>4</b> = 2<sup>2</sup>','<b>6</b> = 2 &middot; 3'],
+        showFactor:true, showMax:true,
+        maxText:'Per ogni primo tieni l\'esponente <b>più alto</b>: <b>2<sup>2</sup></b> (dal 4) e <b>3</b> (dal 6).',
+        product:'2<sup>2</sup> &middot; 3' },
+      { support:"1/3", frac:33,
+        story:'Tre giostre di un luna park ripartono insieme all\'apertura. La prima ogni <b>6</b> minuti, la seconda ogni <b>9</b>, la terza ogni <b>15</b>. Dopo quanti minuti ripartono di nuovo <b>tutte e tre insieme</b>?',
+        items:[{label:"ogni 6 m",freq:6},{label:"ogni 9 m",freq:9},{label:"ogni 15 m",freq:15}],
+        illus:"plain", mcm:90,
+        factor:['<b>6</b> = 2 &middot; 3','<b>9</b> = 3<sup>2</sup>','<b>15</b> = 3 &middot; 5'],
+        showFactor:true, showMax:false,
+        maxAnswers:[{base:2,exp:1},{base:3,exp:2},{base:5,exp:1}],
+        product:'' },
+      { support:"0", frac:0,
+        story:'Sara, Luca e Anna nuotano con ritmi diversi. Sara ogni <b>8</b> giorni, Luca ogni <b>12</b>, Anna ogni <b>18</b>. Se oggi si sono allenati tutti e tre, fra quanti giorni si ritroveranno <b>di nuovo insieme</b>?',
+        items:[{label:"ogni 8 g",freq:8},{label:"ogni 12 g",freq:12},{label:"ogni 18 g",freq:18}],
+        illus:"none", mcm:72,
+        showFactor:false, showMax:false,
+        product:'' }
+    ];
+
+    function eventsSVG(items, mcm, reveal){
+      const n=items.length, x0=90, x1=330, W=344, rowH=30, top=20;
+      const H=top+(n-1)*rowH+22;
+      const xOf=v=> (x0+(v/mcm)*(x1-x0));
+      let s="";
+      if(reveal){
+        const cx=xOf(mcm).toFixed(1);
+        s+='<line x1="'+cx+'" y1="'+(top-12)+'" x2="'+cx+'" y2="'+(top+(n-1)*rowH+12)+'" stroke="var(--accent)" stroke-width="2" stroke-dasharray="4 4"/>';
+      }
+      items.forEach((it,i)=>{
+        const y=top+i*rowH;
+        s+='<text x="6" y="'+(y+4)+'" font-family="var(--head)" font-size="10.5" font-weight="600" fill="var(--primaryD)">'+it.label+'</text>';
+        s+='<line x1="'+x0+'" y1="'+y+'" x2="'+x1+'" y2="'+y+'" stroke="var(--brd2)" stroke-width="2" stroke-linecap="round"/>';
+        s+='<circle cx="'+x0+'" cy="'+y+'" r="4.5" fill="var(--primary)" opacity="0.4"/>';
+        for(let v=it.freq; v<=mcm; v+=it.freq){
+          const last=v===mcm;
+          const fill=(reveal&&last)?"var(--accent)":"var(--primary)";
+          const r=(reveal&&last)?6:4.5;
+          s+='<circle cx="'+xOf(v).toFixed(1)+'" cy="'+y+'" r="'+r+'" fill="'+fill+'"/>';
+          if(reveal&&last) s+='<circle cx="'+xOf(v).toFixed(1)+'" cy="'+y+'" r="9.5" fill="none" stroke="var(--accent)" stroke-width="1.5" opacity="0.55"/>';
+        }
+      });
+      if(reveal){
+        s+='<text x="'+xOf(mcm).toFixed(1)+'" y="'+(top+(n-1)*rowH+18)+'" text-anchor="middle" font-family="var(--head)" font-size="11" font-weight="700" fill="var(--accentD)">'+mcm+'</text>';
+      }
+      const aria = reveal ? ("I ritmi si incontrano dopo "+mcm) : "I ritmi a confronto: trova dove coincidono";
+      return '<div class="f3-illus"><svg viewBox="0 0 '+W+' '+H+'" role="img" aria-label="'+aria+'"><title>'+aria+'</title>'+s+'</svg></div>';
+    }
+
+    function hintFor(P, ans){
+      if(ans % P.mcm === 0 && ans > P.mcm) return "È un multiplo comune, ma non il più piccolo.";
+      const allMult = P.items.every(it => ans % it.freq === 0);
+      if(allMult && ans > P.mcm) return "Tutti tornano insieme a quel numero, ma esiste un istante precedente.";
+      if(P.items.some(it => ans % it.freq !== 0)) return "Almeno uno dei ritmi non torna esatto a quel numero.";
+      return "Deve essere divisibile da tutti i ritmi e il più piccolo possibile.";
+    }
+
+    body.innerHTML =
+      '<p class="f3-intro">Hai visto il metodo: <b>scomponi</b> in fattori primi, prendi l\'<b>esponente più alto</b> di ogni primo, '+
+      '<b>moltiplica</b>. Ora tre problemi: nel primo quasi tutto è già pronto, poi l\'aiuto cala, '+
+      'fino all\'ultimo che risolvi da solo.</p>'+
+      '<div class="f3-steps" id="f3-steps"></div>';
+    const wrap = body.querySelector("#f3-steps");
+
+    function refreshLocks(){
+      [].slice.call(wrap.children).forEach((el, idx) => {
+        const unlocked = idx === 0 || st.solved[idx-1];
+        el.classList.toggle("locked", !unlocked);
+        el.classList.toggle("solved", !!st.solved[idx]);
+      });
+    }
+
+    function renderProb(P, idx){
+      const el = document.createElement("div");
+      el.className = "f3-prob";
+      const solved = !!st.solved[idx];
+
+      let mid = "";
+      if(P.showFactor){
+        mid += '<div class="f3-given"><div class="lab">Scomposizione in fattori primi</div>'+
+          '<div class="f3-fac">'+P.factor.map(f => '<span>'+f+'</span>').join('')+'</div></div>';
+      }
+      if(P.showFactor && P.showMax){
+        mid += '<p class="f3-maxtext">'+P.maxText+'</p>';
+      } else if(P.showFactor && !P.showMax){
+        mid += '<div class="f3-given"><div class="lab">Scegli l\'esponente più alto per ogni primo</div>'+
+          '<div class="f3-maxrow">'+
+          P.maxAnswers.map(m => '<div class="f3-exp"><label>Primo <span class="base">'+m.base+'</span></label>'+
+            '<input type="number" inputmode="numeric" min="0" max="6" class="f3-expi" data-base="'+m.base+'"'+
+            (solved ? ' value="'+m.exp+'" disabled' : '')+'></div>').join('')+
+          '</div></div>';
+      } else {
+        mid += '<textarea class="f3-scratch" rows="3" placeholder="Spazio per i tuoi calcoli (facoltativo)…"></textarea>';
+      }
+
+      const eqLead = 'MCM = ' + (P.product ? P.product + ' = ' : '');
+      const ansHTML = '<div class="f3-answer"><span class="eq">'+eqLead+'</span>'+
+        '<input type="number" inputmode="numeric" min="1" class="f3-ans" aria-label="Valore del MCM"'+
+        (solved ? ' value="'+P.mcm+'" disabled' : '')+'>'+
+        (solved ? '' : '<button class="btn primary f3-check" type="button">'+icon("ic-check")+'Verifica</button>')+
+        '</div>';
+
+      const illusHTML = P.illus === "none" ? '' : eventsSVG(P.items, P.mcm, P.illus === "full");
+
+      el.innerHTML =
+        '<div class="f3-phead">'+
+          '<span class="f3-badge"><span class="n">'+(idx+1)+'</span>Problema '+(idx+1)+'</span>'+
+          '<span class="f3-support">Supporto '+P.support+'<span class="f3-gauge"><i style="width:'+P.frac+'%"></i></span></span>'+
+        '</div>'+
+        '<div class="f3-body">'+
+          '<p class="f3-story">'+P.story+'</p>'+
+          illusHTML + mid + ansHTML +
+          '<div class="f3-fb'+(solved ? ' ok' : '')+'" role="status" aria-live="polite">'+
+            (solved ? 'Risolto: il MCM è '+P.mcm+'.' : '')+'</div>'+
+        '</div>';
+
+      const fb = el.querySelector(".f3-fb");
+      const ansEl = el.querySelector(".f3-ans");
+      const checkBtn = el.querySelector(".f3-check");
+      const scratch = el.querySelector(".f3-scratch");
+      function setFb(kind, txt){ fb.className = "f3-fb " + kind; fb.textContent = txt; }
+
+      if(scratch){
+        scratch.value = st.scratch || "";
+        scratch.addEventListener("input", () => { st.scratch = scratch.value; persist(); });
+      }
+      if(checkBtn){
+        checkBtn.addEventListener("click", () => {
+          if(P.showFactor && !P.showMax){
+            const expIns = [].slice.call(el.querySelectorAll(".f3-expi"));
+            let anyEmpty = false, expOk = true;
+            expIns.forEach(ei => {
+              const want = P.maxAnswers.find(m => m.base === parseInt(ei.dataset.base,10)).exp;
+              const got = parseInt(ei.value,10);
+              if(isNaN(got)) anyEmpty = true;
+              else if(got !== want) expOk = false;
+            });
+            if(anyEmpty){ setFb("retry","Completa l'esponente di ogni primo prima di moltiplicare."); return; }
+            if(!expOk){ setFb("retry","Qualche esponente non è ancora il più alto. Confronta le scomposizioni e riprova."); return; }
+          }
+          const ans = parseInt(ansEl.value,10);
+          if(isNaN(ans)){ setFb("retry","Scrivi il valore del MCM."); return; }
+          if(ans === P.mcm){
+            st.solved[idx] = true; persist();
+            setFb("ok", "Esatto: il MCM è "+P.mcm+". "+(idx < 2 ? "Si sblocca il problema successivo, con meno aiuto." : "Hai chiuso i tre problemi, l'ultimo senza impalcatura."));
+            ansEl.disabled = true;
+            checkBtn.disabled = true;
+            el.querySelectorAll(".f3-expi").forEach(ei => ei.disabled = true);
+            el.classList.add("solved");
+            refreshLocks();
+          } else {
+            setFb("retry", "Non ci siamo ancora. "+hintFor(P, ans));
+          }
+        });
+      }
+      return el;
+    }
+
+    PROBS.forEach((P, idx) => wrap.appendChild(renderProb(P, idx)));
+    refreshLocks();
+  }
+
+  const BUILDERS = { f1: buildF1, f2: buildF2, f3: buildF3 };
+
+  /* ---------- Render contenuto fase ---------- */
+  function renderMain(){
+    const p = profile();
+    main.innerHTML = "";
+    SECTIONS.forEach((s, i) => {
+      const sec = document.createElement("section");
+      sec.className = "phase" + (p && i === p.current ? " active" : "");
+      sec.id = "sec-" + s.id;
+      sec.setAttribute("aria-hidden", p && i === p.current ? "false" : "true");
+
+      sec.innerHTML =
+        '<div class="phase-head">'+
+          '<span class="phase-kicker">'+icon(s.icon)+s.kicker+'</span>'+
+          '<h2>'+s.title+'</h2>'+
+          '<p class="lead">'+s.lead+'</p>'+
+        '</div>'+
+        '<div class="phase-body"></div>'+
+        '<div class="phase-nav">'+
+          '<button class="btn secondary" data-dir="-1" type="button">'+icon("ic-arrow")+'Indietro</button>'+
+          '<button class="btn primary" data-dir="1" type="button">Avanti'+icon("ic-arrow")+'</button>'+
+        '</div>';
+
+      const bodyEl = sec.querySelector(".phase-body");
+      if(BUILDERS[s.id]) BUILDERS[s.id](bodyEl, s); else bodyEl.innerHTML = placeholderHTML(s);
+
+      sec.querySelectorAll("[data-dir]").forEach(btn => {
+        btn.addEventListener("click", () => step(parseInt(btn.dataset.dir, 10)));
+      });
+      main.appendChild(sec);
+    });
+    updateNavButtons();
+  }
+
+  function updateNavButtons(){
+    const p = profile();
+    main.querySelectorAll(".phase").forEach((sec, i) => {
+      const back = sec.querySelector('[data-dir="-1"]');
+      const fwd  = sec.querySelector('[data-dir="1"]');
+      if(back) back.disabled = (p.current === 0);
+      if(fwd)  fwd.disabled  = (p.current === SECTIONS.length - 1);
+      // freccia "indietro" guarda a sinistra
+      const sleft = back && back.querySelector("svg");
+      if(sleft) sleft.style.transform = "scaleX(-1)";
+    });
+  }
+
+  /* ---------- Navigazione ---------- */
+  function goTo(i){
+    const p = profile();
+    if(!p) return;
+    i = Math.max(0, Math.min(SECTIONS.length - 1, i));
+    p.current = i;
+    if(!p.visited.includes(i)) p.visited.push(i);
+    persist();
+    syncView();
+    window.scrollTo({ top:0, behavior:"smooth" });
+  }
+  function step(dir){ goTo(profile().current + dir); }
+
+  function syncView(){
+    const p = profile();
+    main.querySelectorAll(".phase").forEach((sec, i) => {
+      const on = i === p.current;
+      sec.classList.toggle("active", on);
+      sec.setAttribute("aria-hidden", on ? "false" : "true");
+    });
+    renderPhasebar();
+    updateNavButtons();
+  }
+
+  /* ---------- Accessibilità ---------- */
+  function applyAccess(){
+    const p = profile();
+    const on = !!(p && p.accessibile);
+    document.documentElement.classList.toggle("accessibile", on);
+    btnAccess.setAttribute("aria-pressed", on ? "true" : "false");
+  }
+  btnAccess.addEventListener("click", () => {
+    const p = profile();
+    if(!p) return;
+    p.accessibile = !p.accessibile;
+    persist();
+    applyAccess();
+  });
+
+  /* ---------- Reset ---------- */
+  btnReset.addEventListener("click", () => {
+    if(!nick) return;
+    const ok = window.confirm('Ricominciare da capo il percorso di "'+nick+'"? Il lavoro salvato verrà cancellato.');
+    if(!ok) return;
+    delete store.profiles[nick];
+    store.active = null;
+    nick = null;
+    persist();
+    openGate();
+  });
+
+  /* ---------- Gate ---------- */
+  function openGate(){
+    gate.hidden = false;
+    nickChip.hidden = true;
+    nickInput.value = "";
+    gateMsg.textContent = "";
+    document.documentElement.classList.remove("accessibile");
+    setTimeout(() => nickInput.focus(), 60);
+  }
+  function startWith(raw){
+    const clean = raw.trim().replace(/\s+/g, "-").toLowerCase().slice(0, 24);
+    if(clean.length < 2){
+      gateMsg.textContent = "Scrivi almeno due caratteri.";
+      nickInput.focus();
+      return;
+    }
+    nick = clean;
+    store.active = nick;
+    if(!store.profiles[nick]) store.profiles[nick] = freshProfile();
+    if(!profile().visited.includes(0)) profile().visited.push(0);
+    persist();
+    enterApp();
+  }
+  gateStart.addEventListener("click", () => startWith(nickInput.value));
+  nickInput.addEventListener("keydown", e => { if(e.key === "Enter") startWith(nickInput.value); });
+
+  /* ---------- Avvio ---------- */
+  function enterApp(){
+    const p = profile();
+    gate.hidden = true;
+    nickChip.hidden = false;
+    nickLabel.textContent = nick;
+    applyAccess();
+    renderPhasebar();
+    renderMain();
+    syncView();
+  }
+
+  function init(){
+    if(nick && store.profiles[nick]){
+      enterApp();
+    }else{
+      nick = null;
+      store.active = null;
+      openGate();
+    }
+  }
+
+  init();
+})();
+</script>
+</body>
+</html>
