@@ -305,6 +305,14 @@ footer{
 .f3-prob.solved .f3-badge,.f3-prob.solved .f3-badge .n{color:var(--ok)}
 .f3-prob.solved .f3-badge .n{background:var(--ok);color:#fff}
 
+/* video introduttivo */
+.vid{margin:0 0 22px}
+.vid-head{display:inline-flex;align-items:center;gap:9px;font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--primaryD);background:var(--primaryL);padding:6px 13px;border-radius:999px;margin-bottom:12px}
+.vid-head svg{width:18px;height:18px}
+.vid-wrap{background:#000;border:1px solid var(--brd);border-radius:16px;overflow:hidden;max-width:330px;margin:0 auto;box-shadow:var(--shadow)}
+.vid-wrap video{display:block;width:100%;height:auto}
+.vid-cap{text-align:center;color:var(--muted);font-size:.85rem;margin:9px auto 0;max-width:42ch}
+
 @media(max-width:560px){
   .brand .sub{display:none}
   .phase-head h2{font-size:1.4rem}
@@ -322,6 +330,7 @@ footer{
     <g id="ic-factor"><circle cx="12" cy="5" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="6" cy="18" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="18" cy="18" r="2.4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10.6 6.9 7.4 15.9M13.4 6.9l3.2 9" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
     <g id="ic-prime"><rect x="4" y="4" width="16" height="16" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 8v8M9 11l3-3 3 3" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
     <g id="ic-check"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-play"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor"/></g>
     <g id="ic-arrow"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
     <g id="ic-map"><path d="M9 4 4 6v14l5-2 6 2 5-2V4l-5 2-6-2Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M9 4v14M15 6v14" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/></g>
     <g id="ic-warn"><path d="M12 4 2.5 20h19L12 4Z" fill="none" stroke="currentColor" stroke-width="2" stroke-linejoin="round"/><path d="M12 10v4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><circle cx="12" cy="17" r="1.15" fill="currentColor"/></g>
@@ -496,7 +505,16 @@ footer{
     }
     function pos(min){ return "calc(12px + "+(min/MAX)+" * (100% - 24px))"; }
 
+    const vurl="https://dl.dropboxusercontent.com/scl/fi/bjvs1ourqlb7hr29gu49i/mcm.mp4?rlkey=2vhnfoy57cmy88xcl7zyukx94&raw=1";
     body.innerHTML =
+      '<section class="vid">'+
+        '<span class="vid-head">'+icon("ic-play")+'Guarda prima il video</span>'+
+        '<div class="vid-wrap"><video controls preload="metadata" playsinline>'+
+          '<source src="'+vurl+'" type="video/mp4">'+
+          '<source src="mcm.mp4" type="video/mp4">'+
+          'Il tuo browser non riproduce il video. <a href="'+vurl+'">Aprilo qui<\/a>.'+
+        '<\/video></div>'+
+        '<p class="vid-cap">Il minimo comune multiplo spiegato passo passo. Poi esplora il problema degli autobus qui sotto.</p></section>'+
       '<p class="f1-intro">Tre linee di autobus partono insieme dal capolinea alle <b>07:00</b>. '+
       'Ognuna torna con il suo ritmo: <b>A</b> ogni 12 minuti, <b>B</b> ogni 15, <b>C</b> ogni 18. '+
       'Quando ripartono di nuovo <b>tutte e tre insieme</b>? Fai scorrere il tempo e osserva i passaggi.</p>'+

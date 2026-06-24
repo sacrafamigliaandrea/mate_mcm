@@ -124,6 +124,14 @@ footer{max-width:var(--maxw);margin:0 auto;padding:22px 18px 40px;color:var(--li
 .pp-prop .lbl{display:block;font-family:var(--body);font-weight:400;font-size:.7rem;color:var(--muted);text-align:center;margin-top:3px}
 .pp-cell{display:flex;flex-direction:column}
 
+/* video introduttivo */
+.vid{margin:0 0 24px}
+.vid-head{display:inline-flex;align-items:center;gap:9px;font-family:var(--head);font-weight:600;font-size:.92rem;color:var(--primaryD);background:var(--primaryL);padding:6px 13px;border-radius:999px;margin-bottom:12px}
+.vid-head svg{width:18px;height:18px}
+.vid-wrap{background:#000;border:1px solid var(--brd);border-radius:16px;overflow:hidden;max-width:330px;margin:0 auto;box-shadow:var(--shadow)}
+.vid-wrap video{display:block;width:100%;height:auto}
+.vid-cap{text-align:center;color:var(--muted);font-size:.85rem;margin:9px auto 0;max-width:42ch}
+
 @media(max-width:560px){
   .brand .sub{display:none}
   .phase-head h2{font-size:1.4rem}
@@ -138,6 +146,7 @@ footer{max-width:var(--maxw);margin:0 auto;padding:22px 18px 40px;color:var(--li
   <defs>
     <g id="ic-frac"><line x1="5" y1="12" x2="19" y2="12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="9" y="4.5" width="6" height="4" rx="1" fill="currentColor"/><rect x="9" y="15.5" width="6" height="4" rx="1" fill="currentColor"/></g>
     <g id="ic-check"><path d="M5 12.5l4.5 4.5L19 7" fill="none" stroke="currentColor" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/></g>
+    <g id="ic-play"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M10 8.5l6 3.5-6 3.5z" fill="currentColor"/></g>
     <g id="ic-arrow"><path d="M5 12h13M12 6l6 6-6 6" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
     <g id="ic-access"><circle cx="12" cy="4.6" r="2" fill="currentColor"/><path d="M4 8.5c2.6 1 5.1 1.5 8 1.5s5.4-.5 8-1.5M12 10v5M12 15l-3.2 5M12 15l3.2 5" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></g>
     <g id="ic-reset"><path d="M19 12a7 7 0 1 1-2.05-4.95M19 4v4h-4" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
@@ -347,13 +356,25 @@ footer{max-width:var(--maxw);margin:0 auto;padding:22px 18px 40px;color:var(--li
     refreshLocks();
   }
 
+  function videoIntro(){
+    const drop="https://dl.dropboxusercontent.com/scl/fi/5wnzlbjp4jdxe3fa7xcfn/frazioni1.mp4?rlkey=56a77si8ze9apoh1ass5zen4e&raw=1";
+    return '<section class="vid">'+
+      '<span class="vid-head">'+icon("ic-play")+'Guarda prima il video</span>'+
+      '<div class="vid-wrap"><video controls preload="metadata" playsinline>'+
+        '<source src="'+drop+'" type="video/mp4">'+
+        '<source src="frazioni1.mp4" type="video/mp4">'+
+        'Il tuo browser non riproduce il video. <a href="'+drop+'">Aprilo qui<\/a>.'+
+      '<\/video></div>'+
+      '<p class="vid-cap">Il metodo spiegato passo passo. Poi mettilo in pratica nei tre problemi qui sotto.</p></section>';
+  }
+
   function renderMain(){
     main.innerHTML =
       '<div class="phase-head">'+
         '<span class="phase-kicker">'+icon("ic-frac")+'Pratica · dalla parte all\'intero</span>'+
         '<h2>Conosci una frazione: ricostruisci il tutto</h2>'+
         '<p class="lead">Tre problemi, sempre lo stesso metodo: trova quanto vale una parte, poi moltiplica per il denominatore. A ogni problema l\'impalcatura si abbassa.</p>'+
-      '</div><div class="phase-body"></div>';
+      '</div>'+videoIntro()+'<div class="phase-body"></div>';
     buildPractice(main.querySelector(".phase-body"));
   }
 
