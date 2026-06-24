@@ -108,6 +108,12 @@ footer{max-width:var(--maxw);margin:0 auto;padding:22px 18px 40px;color:var(--li
 .f3-answer input:disabled{opacity:.85;background:var(--okL);border-color:var(--ok);color:var(--ok)}
 .f3-scratch{display:block;width:100%;max-width:520px;margin:0 0 4px;font-size:17px;font-family:var(--body);padding:11px 13px;border:1.5px solid var(--brd2);border-radius:12px;resize:vertical;color:var(--text);background:#fff;line-height:1.5}
 .f3-scratch:focus-visible{border-color:var(--primary);outline:none}
+.f3-decide{margin:16px 0 4px;padding:14px 16px;background:var(--bg);border:1px solid var(--brd2);border-radius:12px}
+.f3-decide-q{margin:0 0 12px;font-family:var(--head);font-weight:600;font-size:1rem;color:var(--text)}
+.f3-decide-opts{display:flex;flex-wrap:wrap;gap:10px}
+.f3-opt{background:#fff;border:1.5px solid var(--brd2);color:var(--text);font-weight:600}
+.f3-opt:not(:disabled):hover{border-color:var(--primary)}
+.f3-opt[data-sel="1"]{background:var(--okL);border-color:var(--ok);color:var(--ok)}
 .f3-fb{min-height:22px;margin-top:13px;font-size:.95rem;font-weight:500}
 .f3-fb.retry{color:var(--accentD)}
 .f3-fb.ok{color:var(--ok)}
@@ -256,14 +262,29 @@ footer{max-width:var(--maxw);margin:0 auto;padding:22px 18px 40px;color:var(--li
 
   const PROBS = [
     { support:"2/3", frac:66, level:1,
-      story:'I <b>2/5</b> di un libro sono <b>60</b> pagine. Quante pagine ha il libro <b>intero</b>?',
-      num:2, den:5, parte:60, intero:150, unit:"pagine", illus:"full" },
+      ctx:'Stai scaricando un gioco nuovo. La barra di download è arrivata ai <b>2/5</b> e il telefono segna <b>60 MB</b> già scaricati.',
+      story:'Quanti MB pesa il gioco <b>intero</b>?',
+      num:2, den:5, parte:60, intero:150, unit:"MB", illus:"full",
+      dec:{ q:'Per installarlo devono restare liberi tutti i MB del gioco intero. Sul telefono ne hai <b>120</b> liberi: bastano?',
+        opts:[{t:'Sì, bastano',ok:false},{t:'No, non bastano',ok:true}],
+        why:'Il gioco intero pesa 150 MB, ma ne hai solo 120 liberi: mancano 30 MB. Prima devi liberare spazio.',
+        nudge:'Confronta i MB del gioco intero che hai trovato con i 120 MB liberi.' } },
     { support:"1/3", frac:33, level:2,
-      story:'I <b>3/7</b> di una pista ciclabile misurano <b>51</b> km. Quanto è lunga la pista <b>intera</b>?',
-      num:3, den:7, parte:51, intero:119, unit:"km", illus:"plain" },
+      ctx:'In un gioco a stagioni hai completato i <b>3/7</b> delle missioni: finora sono <b>51</b> missioni.',
+      story:'Quante missioni ha la stagione <b>intera</b>?',
+      num:3, den:7, parte:51, intero:119, unit:"missioni", illus:"plain",
+      dec:{ q:'La stagione finisce tra <b>10 giorni</b> e ti restano le missioni mancanti. Facendone <b>6 al giorno</b>, finisci in tempo?',
+        opts:[{t:'Sì, ce la faccio',ok:false},{t:'No, non basta',ok:true}],
+        why:'Le missioni totali sono 119, ne hai fatte 51: ne restano 68. In 10 giorni a 6 al giorno ne fai 60, meno di 68. Dovresti farne almeno 7 al giorno.',
+        nudge:'Prima trova quante missioni mancano (totale meno quelle fatte), poi conta quante ne fai in 10 giorni.' } },
     { support:"0", frac:0, level:3,
-      story:'I <b>4/9</b> di un risparmio sono <b>72</b> euro. A quanto ammonta il risparmio <b>intero</b>?',
-      num:4, den:9, parte:72, intero:162, unit:"euro", illus:"none" }
+      ctx:'Stai risparmiando per delle cuffie. Finora hai messo da parte <b>72&nbsp;&euro;</b>, cioè i <b>4/9</b> del prezzo.',
+      story:'Quanto costano le cuffie (prezzo <b>intero</b>)?',
+      num:4, den:9, parte:72, intero:162, unit:"€", illus:"none",
+      dec:{ q:'Un negozio le vende a <b>162&nbsp;&euro;</b>. Un altro dice «paghi i <b>3/4</b> del prezzo». Dove spendi meno?',
+        opts:[{t:'Primo negozio (162 €)',ok:false},{t:'Secondo negozio (3/4 del prezzo)',ok:true}],
+        why:'I 3/4 di 162 € sono 121,50 €, meno di 162 €. Conviene il secondo negozio.',
+        nudge:'Calcola quanto sono i 3/4 di 162 € e confrontalo con 162 €.' } }
   ];
 
   function buildPractice(body){
@@ -276,7 +297,8 @@ footer{max-width:var(--maxw);margin:0 auto;padding:22px 18px 40px;color:var(--li
       '<p class="f3-intro">Il metodo del video: la parte che conosci vale alcune parti uguali del tutto. '+
       'Prima trovi quanto vale <b>una</b> parte (<b>parte &divide; numeratore</b>), '+
       'poi ricostruisci l\'intero (<b>&times; denominatore</b>). '+
-      'Tre problemi: nel primo quasi tutto è pronto, poi l\'aiuto cala, fino all\'ultimo che risolvi da solo.</p>'+
+      'In ogni problema, trovato l\'intero, <b>decidi tu</b> cosa fare nella situazione reale. '+
+      'Nel primo quasi tutto è pronto, poi l\'aiuto cala, fino all\'ultimo che risolvi da solo.</p>'+
       '<div class="f3-steps" id="f3-steps"></div>';
     const wrap = body.querySelector("#f3-steps");
 
@@ -316,16 +338,42 @@ footer{max-width:var(--maxw);margin:0 auto;padding:22px 18px 40px;color:var(--li
 
       const illusHTML = P.illus==="none" ? '' : fracSVG(P.num, P.den, P.parte, P.intero, P.illus==="full");
 
+      const optsHTML = P.dec.opts.map(o=>
+        '<button class="btn f3-opt" type="button" data-ok="'+(o.ok?'1':'0')+'"'+
+        (solved?((o.ok?' data-sel="1"':'')+' disabled'):'')+'>'+o.t+'</button>').join('');
+      const decideHTML = '<div class="f3-decide"'+(solved?'':' hidden')+'>'+
+        '<p class="f3-decide-q">'+P.dec.q+'</p>'+
+        '<div class="f3-decide-opts">'+optsHTML+'</div></div>';
+
       el.innerHTML =
         '<div class="f3-phead"><span class="f3-badge"><span class="n">'+(idx+1)+'</span>Problema '+(idx+1)+'</span>'+
           '<span class="f3-support">Supporto '+P.support+'<span class="f3-gauge"><i style="width:'+P.frac+'%"></i></span></span></div>'+
-        '<div class="f3-body"><p class="f3-story">'+P.story+'</p>'+illusHTML+mid+ansHTML+
-          '<div class="f3-fb'+(solved?' ok':'')+'" role="status" aria-live="polite">'+(solved?'Risolto: '+P.intero+' '+P.unit+'.':'')+'</div></div>';
+        '<div class="f3-body"><p class="f3-story">'+P.ctx+' '+P.story+'</p>'+illusHTML+mid+ansHTML+decideHTML+
+          '<div class="f3-fb'+(solved?' ok':'')+'" role="status" aria-live="polite">'+(solved?P.dec.why:'')+'</div></div>';
 
       const fb=el.querySelector(".f3-fb"), ansEl=el.querySelector(".f3-ans"),
-        checkBtn=el.querySelector(".f3-check"), scratch=el.querySelector(".f3-scratch");
+        checkBtn=el.querySelector(".f3-check"), scratch=el.querySelector(".f3-scratch"),
+        decide=el.querySelector(".f3-decide");
       function setFb(k,t){ fb.className="f3-fb "+k; fb.textContent=t; }
+      function lockInputs(){
+        ansEl.disabled=true; if(checkBtn) checkBtn.disabled=true;
+        const ne=el.querySelector(".pp-num"), de=el.querySelector(".pp-den");
+        if(ne) ne.disabled=true; if(de) de.disabled=true;
+      }
       if(scratch){ scratch.value=st.scratch||""; scratch.addEventListener("input",()=>{ st.scratch=scratch.value; persist(); }); }
+      [].slice.call(el.querySelectorAll(".f3-opt")).forEach(b=>{
+        b.addEventListener("click", ()=>{
+          if(b.getAttribute("data-ok")==="1"){
+            st.solved[idx]=true; persist();
+            [].slice.call(el.querySelectorAll(".f3-opt")).forEach(x=>{ x.disabled=true; x.removeAttribute("data-sel"); });
+            b.setAttribute("data-sel","1");
+            setFb("ok", P.dec.why+" "+(idx<2?"Si sblocca il problema successivo, con meno aiuto.":"Hai chiuso i tre problemi, l'ultimo senza impalcatura."));
+            el.classList.add("solved"); refreshLocks();
+          } else {
+            setFb("retry","Ripensaci. "+P.dec.nudge);
+          }
+        });
+      });
       if(checkBtn){
         checkBtn.addEventListener("click", ()=>{
           if(P.level === 2){
@@ -338,12 +386,9 @@ footer{max-width:var(--maxw);margin:0 auto;padding:22px 18px 40px;color:var(--li
           const ans=parseInt(ansEl.value,10);
           if(isNaN(ans)){ setFb("retry","Scrivi quanto vale l'intero."); return; }
           if(ans===P.intero){
-            st.solved[idx]=true; persist();
-            setFb("ok","Esatto: "+P.intero+" "+P.unit+". "+(idx<2?"Si sblocca il problema successivo, con meno aiuto.":"Hai chiuso i tre problemi, l'ultimo senza impalcatura."));
-            ansEl.disabled=true; checkBtn.disabled=true;
-            const ne=el.querySelector(".pp-num"), de=el.querySelector(".pp-den");
-            if(ne) ne.disabled=true; if(de) de.disabled=true;
-            el.classList.add("solved"); refreshLocks();
+            lockInputs();
+            decide.hidden=false;
+            setFb("ok","Intero = "+P.intero+" "+P.unit+". Ora tocca a te: leggi la situazione e decidi.");
           } else {
             setFb("retry","Non ci siamo ancora. "+hintFor(P,ans));
           }
